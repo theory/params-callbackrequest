@@ -3,6 +3,15 @@ Revision history for Perl extension Params::CallbackExec.
 1.10  
       - Code moved over from MasonX::ApacheHandler::WithCallbacks, which is
         deprecated. Differences from that class are as follows.
+      - Code from MasonX::ApacheHandler::WithCallbacks has been migrated to
+        Params::CallbackExec.
+      - Code from MasonX::CallbackHandler has been migrated to
+        Params::Callback.
+      - MasonX::CallbackTester has been removed, since it isn't necessary
+        in a non-mod_perl environment.
+      - Created Params::Callback::Exceptions to create all of the exception
+        classes used by Params::CallbackExec. These no longer inherit from
+        HTML::Mason::Exception, of course, but from Exception::Class::Base.
       - Renamed the "exec_null_cb_values" parameter to "ignore_nulls". It is
         now false by default, and you pass a true value to enable it. Thus the
         semantics are the opposite of "exec_null_cb_values", but the result is
@@ -13,5 +22,7 @@ Revision history for Perl extension Params::CallbackExec.
         MasonX::CallbackHandler to C<params()> in Params::Callback, to reflect
         the idea that this is a generic parameter-triggered callback
         architecture.
+      - Replaced teh C<ah()> accessor, since the callback controller isn't
+        a Mason ApacheHandler anymore, with C<cb_exec()> in Params::Callback.
       - Removed the C<apache_req()> accessor. It will likely reappear in a
         subclass of Params::Callback soon.
