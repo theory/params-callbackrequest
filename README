@@ -36,7 +36,7 @@ The object-oriented callback interface requires Perl 5.6 or later and
 these other modules and libraries:
 
   Attribute::Handlers 0.77 or later
-  Clas::ISA
+  Class::ISA
 
 The test suite requires:
 
