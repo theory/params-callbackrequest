@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name: Params-CallbackRequest
-version: 1.10
+version: 1.11
 license: perl
 distribution_type: module
 requires:
@@ -17,11 +17,11 @@ conflicts: {}
 provides:
   Params::Callback:
     file: lib/Params/Callback.pm
-    version: 1.10
+    version: 1.11
   Params::CallbackRequest:
     file: lib/Params/CallbackRequest.pm
-    version: 1.10
+    version: 1.11
   Params::CallbackRequest::Exceptions:
     file: lib/Params/CallbackRequest/Exceptions.pm
-    version: 1.1
+    version: 1.11
 generated_by: Module::Build version 0.20
