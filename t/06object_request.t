@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 06object_global.t,v 1.2 2003/08/15 22:48:25 david Exp $
+# $Id: 06object_request.t,v 1.1 2003/08/16 00:48:48 david Exp $
 
 use strict;
 use Test::More;
@@ -192,7 +192,7 @@ is( $params{result}, 'TAKE ME UP AGAIN! PRECALLBACK Overridden PostCallback',
     "Check subclassed pre callback result" );
 
 ##############################################################################
-# Check that no of the unneeded attributes are populated during global
+# Check that no of the unneeded attributes are populated during request
 # callbacks.
 %params = ("$base_key|pre_post_cb" => 1);
 ok( $cb_exec->execute(\%params), "Execute attribute check callback" );

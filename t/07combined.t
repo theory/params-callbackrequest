@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 07combined.t,v 1.1 2003/08/15 22:42:08 david Exp $
+# $Id: 07combined.t,v 1.2 2003/08/16 00:48:48 david Exp $
 
 use strict;
 use Test::More;
@@ -64,7 +64,7 @@ sub another {
 }
 
 ##############################################################################
-# And a functional global callback.
+# And a functional request callback.
 sub presto {
     my $cb = shift;
     main::isa_ok($cb, 'Params::Callback');
@@ -95,11 +95,11 @@ ok( $cb_exec->execute(\%params), "Execute OO callback" );
 is( $params{result}, 'Simple Success', "Check OO result" );
 
 ##############################################################################
-# Make sure that functional and OO global callbacks execute, too.
+# Make sure that functional and OO request callbacks execute, too.
 %params = ( do_lower => 1,
             do_presto => 1);
-ok( $cb_exec->execute(\%params), "Execute global callbacks" );
-is( $params{result}, 'presto', "Check global result" );
+ok( $cb_exec->execute(\%params), "Execute request callbacks" );
+is( $params{result}, 'presto', "Check request result" );
 
 1;
 __END__

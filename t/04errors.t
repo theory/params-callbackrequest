@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 04errors.t,v 1.2 2003/08/15 23:20:21 david Exp $
+# $Id: 04errors.t,v 1.3 2003/08/16 00:48:48 david Exp $
 
 use strict;
 use Test::More tests => 50;
@@ -80,14 +80,14 @@ like( $err->error,
       "Check used key error message" );
 
 ##############################################################################
-# Test a bad global code ref.
+# Test a bad request code ref.
 eval {Params::CallbackExec->new(pre_callbacks => ['foo']) };
-ok( $err = $@, "Catch bad global code ref exception" );
+ok( $err = $@, "Catch bad request code ref exception" );
 isa_ok($err, 'Params::Callback::Exception' );
 isa_ok($err, 'Params::Callback::Exception::Params' );
 like( $err->error,
-      qr/Global pre callback not a code reference/,
-      'Check bad global code ref exception' );
+      qr/Request pre callback not a code reference/,
+      'Check bad request code ref exception' );
 
 ##############################################################################
 # Make sure that Params::Validate is using our exceptions.
