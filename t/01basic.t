@@ -1,9 +1,9 @@
 #!perl -w
 
-# $Id: 01basic.t,v 1.5 2003/08/18 23:56:09 david Exp $
+# $Id: 01basic.t,v 1.6 2003/08/19 05:27:57 david Exp $
 
 use strict;
-use Test::More tests => 55;
+use Test::More tests => 57;
 
 BEGIN { use_ok('Params::CallbackRequest') }
 
@@ -172,6 +172,10 @@ ok( my $cb_request = Params::CallbackRequest->new( callbacks      => $cbs,
                                              pre_callbacks  => [\&flip] ),
     "Construct CBExec object" );
 isa_ok($cb_request, 'Params::CallbackRequest' );
+
+# Check its accessor methods.
+is( $cb_request->default_priority, 5, "Check default priority" );
+is ( $cb_request->default_pkg_key, 'DEFAULT', "Check default package name" );
 
 ##############################################################################
 # Test the callbacks themselves.
