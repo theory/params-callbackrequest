@@ -538,7 +538,7 @@ like this:
   }
 
 As with functional callback subroutines, method callbacks are executed with a
-custom exception handler. Again see the C<exception_handler> parameter to
+custom exception handler. Again, see the C<exception_handler> parameter to
 install your own exception handler.
 
 B<Note:> Under mod_perl, it's important that you C<use> any and all
