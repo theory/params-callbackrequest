@@ -1,10 +1,10 @@
 #!perl -w
 
-# $Id: 06object_global.t,v 1.1 2003/08/15 22:42:08 david Exp $
+# $Id: 06object_global.t,v 1.2 2003/08/15 22:48:25 david Exp $
 
 use strict;
 use Test::More;
-my $base_key = 'OOTester';
+my $base_key;
 
 ##############################################################################
 # Figure out if the current configuration can handle OO callbacks.
@@ -17,7 +17,9 @@ BEGIN {
       unless eval { require Attribute::Handlers }
       and eval { require Class::ISA };
 
-    plan tests => 43;
+    plan tests => 44;
+
+    $base_key = 'OOTester';
 }
 
 ##############################################################################
@@ -27,7 +29,9 @@ package Params::Callback::TestObjects;
 
 use strict;
 use base 'Params::Callback';
-__PACKAGE__->register_subclass( class_key => $base_key);
+use constant CLASS_KEY => $base_key;
+use constant DEFAULT_PRIORITY => 3;
+__PACKAGE__->register_subclass;
 
 sub upperit : PreCallback {
     my $self = shift;
@@ -53,6 +57,7 @@ sub pre_post : Callback {
     my $self = shift;
     main::isa_ok($self, 'Params::Callback');
     main::isa_ok($self, __PACKAGE__);
+    main::is($self->priority, 3, "Check default priority constant" );
     my $params = $self->params;
     $params->{chk_post} = 1;
 }
@@ -80,10 +85,12 @@ sub chk_post : PostCallback {
 # Now set up an a subclass that overrides pre and post execution callbacks,
 # and provides a couple of new ones, too.
 ##############################################################################
-package Params::Callback::TestObjects::ExecSub;
+package Params::Callback::TestObjects::Sub;
 use strict;
 use base 'Params::Callback::TestObjects';
-__PACKAGE__->register_subclass( class_key => $base_key . 'ExecSub');
+use constant CLASS_KEY => $base_key . 'Sub';
+__PACKAGE__->register_subclass;
+
 sub upperit : PreCallback {
     my $self = shift;
     $self->SUPER::upperit;
@@ -165,7 +172,7 @@ is( $params{result}, 'TAKE ME UP!', "Check pre callback result" );
 ##############################################################################
 # Make sure that pre and post execution callback inheritance works properly.
 ok( $cb_exec = Params::CallbackExec->new
-    (cb_classes => [$base_key . 'ExecSub']),
+    (cb_classes => [$base_key . 'Sub']),
     "Construct subclasseed callback CBExec" );
 
 ##############################################################################
