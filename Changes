@@ -1,6 +1,17 @@
 Revision history for Perl extension Params::CallbackExec.
 
-0.01  Wed Aug 13 13:12:41 2003
-	- original version; created by h2xs 1.22 with options
-		-An Params::CallbackExec
-
+1.10  
+      - Code moved over from MasonX::ApacheHandler::WithCallbacks, which is
+        deprecated. Differences from that class are as follows.
+      - Renamed the "exec_null_cb_values" parameter to "ignore_nulls". It is
+        now false by default, and you pass a true value to enable it. Thus the
+        semantics are the opposite of "exec_null_cb_values", but the result is
+        the same.
+      - Renamed the "cb_exception_handler" to "exception_handler", since it's
+        now obvious that it applies to callbacks.
+      - Changed the C<request_args()> accessor from that was in
+        MasonX::CallbackHandler to C<params()> in Params::Callback, to reflect
+        the idea that this is a generic parameter-triggered callback
+        architecture.
+      - Removed the C<apache_req()> accessor. It will likely reappear in a
+        subclass of Params::Callback soon.
