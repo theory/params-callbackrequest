@@ -898,7 +898,7 @@ this module to provide a callback architecture for HTML::Mason.
 
 =head1 AUTHOR
 
-David Wheeler <david@wheeler.net>
+David Wheeler <david@kineticode.com>
 
 =head1 COPYRIGHT AND LICENSE
 
