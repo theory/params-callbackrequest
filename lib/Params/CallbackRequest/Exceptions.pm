@@ -224,7 +224,7 @@ David Wheeler <david@kineticode.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2003 by David Wheeler
+Copyright 2003-2004 David Wheeler
 
 This library is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
