@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 01basic.t,v 1.6 2003/08/19 05:27:57 david Exp $
+# $Id: 01basic.t,v 1.7 2003/08/19 16:53:23 david Exp $
 
 use strict;
 use Test::More tests => 57;
@@ -167,9 +167,10 @@ sub flip {
 # Construct the CallbackRequest object.
 ##############################################################################
 
-ok( my $cb_request = Params::CallbackRequest->new( callbacks      => $cbs,
-                                             post_callbacks => [\&upper],
-                                             pre_callbacks  => [\&flip] ),
+ok( my $cb_request = Params::CallbackRequest->new
+    ( callbacks      => $cbs,
+      post_callbacks => [\&upper],
+      pre_callbacks  => [\&flip] ),
     "Construct CBExec object" );
 isa_ok($cb_request, 'Params::CallbackRequest' );
 
@@ -264,7 +265,7 @@ is( $params{result}, 'SUCCESS', "Check post result" );
 ##############################################################################
 # Now make sure that a callback with a value executes.
 ok( my $new_cb_request = Params::CallbackRequest->new( callbacks    => $cbs,
-                                                 ignore_nulls => 1),
+                                                       ignore_nulls => 1),
     "Create new CBExec that ignores nulls" );
 %params = ( "$key|simple_cb" => 1);
 ok( $new_cb_request->request(\%params), "Execute simple callback" );
