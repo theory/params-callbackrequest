@@ -22,7 +22,5 @@ Revision history for Perl extension Params::CallbackRequest.
         MasonX::CallbackHandler to C<params()> in Params::Callback, to reflect
         the idea that this is a generic parameter-triggered callback
         architecture.
-      - Replaced teh C<ah()> accessor, since the callback controller isn't
+      - Replaced the C<ah()> accessor, since the callback controller isn't
         a Mason ApacheHandler anymore, with C<cb_request()> in Params::Callback.
-      - Removed the C<apache_req()> accessor. It will likely reappear in a
-        subclass of Params::Callback soon.
