@@ -35,7 +35,6 @@ BEGIN {
     for my $attr (qw( cb_request
                       params
                       apache_req
-                      cgi_object
                       priority
                       cb_key
                       pkg_key
@@ -58,11 +57,6 @@ my %valid_params =
 
     apache_req   =>
     { isa        => 'Apache',
-      optional   => 1,
-    },
-
-    cgi_object   =>
-    { isa        => 'CGI',
       optional   => 1,
     },
 
@@ -346,8 +340,6 @@ sub redirect {
         $r->method('GET');
         $r->headers_in->unset('Content-length');
         $r->err_header_out( Location => $url );
-    } elsif (my $cgi = $self->{cgi_object}) {
-        $cgi->redirect($url);
     }
     $self->abort($status) unless $wait;
 }
