@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 02priority.t,v 1.2 2003/08/15 00:04:08 david Exp $
+# $Id: 02priority.t,v 1.3 2003/08/15 22:42:08 david Exp $
 
 use strict;
 use Test::More tests => 30;
@@ -81,7 +81,7 @@ ok( $cb_exec->execute(\%params), "Execute default priority callback" );
 
 ##############################################################################
 # Check various priority values.
-my %params = (  "$key|chk_priority_cb0" => 0,
+%params = (  "$key|chk_priority_cb0" => 0,
                 "$key|chk_priority_cb2" => 2,
                 "$key|chk_priority_cb9" => 9,
                 "$key|chk_priority_cb7" => 7,

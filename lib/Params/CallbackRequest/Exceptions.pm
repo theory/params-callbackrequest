@@ -40,7 +40,8 @@ sub import {
     if ($args{abbr}) {
 	foreach my $name (@{$args{abbr}}) {
 	    no strict 'refs';
-	    die "Unknown exception abbreviation '$name'" unless defined &{$name};
+	    die "Unknown exception abbreviation '$name'"
+              unless defined &{$name};
 	    *{"${caller}::$name"} = \&{$name};
 	}
     }
