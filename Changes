@@ -1,6 +1,6 @@
 Revision history for Perl extension Params::CallbackRequest.
 
-1.11
+1.11  Wed Oct  8 19:27:32 2003
       - Fixed execution of pre and post callbacks so that they execute in the
         order in which they're declared. Thanks to Perl 5.8.1 for rubbing my
         nose in this one!
