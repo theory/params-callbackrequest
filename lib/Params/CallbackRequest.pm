@@ -1022,8 +1022,8 @@ callback. Params::Callback also defines the object-oriented callback
 interface, making its documentation a must-read for anyone who wishes to
 create callback classes and methods.
 
-L<MasonX::Request::WithCallbacks|MasonX::Request::WithCallbacks> uses
-this module to provide a callback architecture for HTML::Mason.
+L<MasonX::Interp::WithCallbacks|MasonX::Intper::WithCallbacks> uses this
+module to provide a callback architecture for HTML::Mason.
 
 =head1 AUTHOR
 
