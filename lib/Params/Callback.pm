@@ -9,8 +9,11 @@ $VERSION = 1.10;
 use constant DEFAULT_PRIORITY => 5;
 use constant REDIRECT => 302;
 
+# Set up an exception to be thrown by Params::Validate, and allow extra
+# parameters not specified, since subclasses may add others.
 Params::Validate::validation_options
-  ( on_fail => sub { throw_bad_params join '', @_ } );
+  ( on_fail     => sub { throw_bad_params join '', @_ },
+    allow_extra => 1 );
 
 my $is_num = { 'valid priority' => sub { $_[0] =~ /^\d$/ } };
 
@@ -28,6 +31,7 @@ BEGIN {
         }
     }
 
+    # Build read-only accessors.
     for my $attr (qw( cb_request
                       params
                       apache_req
@@ -184,21 +188,20 @@ sub PostCallback : ATTR(CODE, BEGIN) {
 }
 
 ##############################################################################
-# This method is called by Params::CallbackRequest to find the
-# names of all the callback methods declared with the PreCallback and
-# PostCallback attributes (might handle those declared with the Callback
-# attribute at some point, as well -- there's some of it in CVS Revision
-# 1.21). This is necessary because, in a BEGIN block, the symbol isn't defined
-# when the attribute callback is called. I would use a CHECK or INIT block,
-# but mod_perl ignores them. So the solution is to have the callback methods
-# save the code references for the methods, make sure that
-# Params::CallbackRequest is loaded _after_ all the classes that
-# inherit from Params::Callback, and have it call this method to go
-# back and find the names of the callback methods. The method names will then
-# of course be used for the callback names. In mod_perl2, we'll likely be able
-# to call this method from a PerlPostConfigHandler instead of making
-# ApacheHandler::WithCallbacks do it, thus relieving the enforced loading
-# order.
+# This method is called by Params::CallbackRequest to find the names of all
+# the callback methods declared with the PreCallback and PostCallback
+# attributes (might handle those declared with the Callback attribute at some
+# point, as well -- there's some of it in CVS Revision 1.21 of
+# MasonX::CallbackHandler). This is necessary because, in a BEGIN block, the
+# symbol isn't defined when the attribute callback is called. I would use a
+# CHECK or INIT block, but mod_perl ignores them. So the solution is to have
+# the callback methods save the code references for the methods, make sure
+# that Params::CallbackRequest is loaded _after_ all the classes that inherit
+# from Params::Callback, and have it call this function to go back and find
+# the names of the callback methods. The method names will then of course be
+# used for the callback names. In mod_perl2, we'll likely be able to call this
+# method from a PerlPostConfigHandler instead of making
+# Params::CallbackRequest do it, thus relieving the enforced loading order.
 # http://perl.apache.org/docs/2.0/user/handlers/server.html#PerlPostConfigHandler
 
 sub _find_names {
@@ -206,7 +209,7 @@ sub _find_names {
         # Find the names of the request callback methods.
         foreach my $type (\%pres, \%posts) {
             # We've stored an index pointing to each method in the @reqs
-            # array under __TMP PreCallback() and PostCallback().
+            # array under __TMP in PreCallback() and PostCallback().
             if (my $idxs = delete $type->{$class}{__TMP}) {
                 foreach my $idx (@$idxs) {
                     my $code = $reqs[$idx];
@@ -214,7 +217,7 @@ sub _find_names {
                     my $sym = Attribute::Handlers::findsym($class, $code)
                       or die "Anonymous subroutines not supported. Make " .
                         "sure that Params::CallbackRequest loads last";
-                    # ApacheHandler::WithCallbacks wants this array reference.
+                    # Params::CallbackRequest wants this array reference.
                     $type->{$class}{*{$sym}{NAME}} = [ sub { goto $code },
                                                        $class ];
                 }
@@ -238,6 +241,7 @@ sub _find_names {
 # callbacks are called for every request, and thus don't have a class
 # association. They still get the correct object passed as their first
 # parameter, however.
+
 sub _copy_meths {
     my $class = shift;
     my %seen;
@@ -267,20 +271,19 @@ sub _copy_meths {
 }
 
 ##############################################################################
-# This method is called by Params::CallbackRequest to find
-# methods for callback classes. This is because Params::Callback stores
-# this list of callback classes, not Params::CallbackRequest.
-# Its arguments are the callback class, the name of the method (callback),
-# and a reference to the priority. We'll only assign the priority if it
-# hasn't been assigned one already -- that is, it hasn't been _called_ with
-# a priority.
+# This method is called by Params::CallbackRequest to find methods for
+# callback classes. This is because Params::Callback stores this list of
+# callback classes, not Params::CallbackRequest. Its arguments are the
+# callback class, the name of the method (callback), and a reference to the
+# priority. We'll only assign the priority if it hasn't been assigned one
+# already -- that is, it hasn't been _called_ with a priority.
 
 sub _get_callback {
     my ($class, $meth, $p) = @_;
     # Get the callback code reference.
     my $c = UNIVERSAL::can($class, $meth) or return;
     # Get the priority for this callback. If there's no priority, it's not
-    # a callback, so skip it.
+    # a callback method, so skip it.
     return unless defined $priorities{$c};
     my $priority = $priorities{$c};
     # Reformat the callback code reference.
@@ -292,10 +295,10 @@ sub _get_callback {
 }
 
 ##############################################################################
-# This method is also called by Params::CallbackRequest, where
-# the cb_classes parameter passes in a list of callback class keys or the
-# string "ALL" to indicate that all of the callback classes should have their
-# callbacks loaded for use by the ApacheHandler.
+# This method is also called by Params::CallbackRequest, where the cb_classes
+# parameter passes in a list of callback class keys or the string "ALL" to
+# indicate that all of the callback classes should have their callbacks loaded
+# for use by Params::CallbacRequest.
 
 sub _load_classes {
     my ($pkg, $ckeys) = @_;
@@ -303,13 +306,13 @@ sub _load_classes {
     return unless defined $ckeys;
     my ($cbs, $pres, $posts);
     # Process the class keys in the order they're given, or just do all of
-    # them if $ckeys eq 'ALL' (checked by ApacheHandler::WithCallbacks).
+    # them if $ckeys eq 'ALL' (checked by Params::CallbackRequest).
     foreach my $ckey (ref $ckeys ? @$ckeys : keys %classes) {
         my $class = $classes{$ckey} or
           die "Class with class key '$ckey' not loaded. Did you forget use"
             . " it or to call register_subclass()?";
         # Map the class key to the class for the class and all of its parent
-        # classes, all for the benefit of ApacheHandler::WithCallbacks.
+        # classes, all for the benefit of Params::CallbackRequest.
         $cbs->{$ckey} = $class;
         foreach my $c (@{$isas{$class}}) {
             next if $c eq __PACKAGE__;
@@ -348,7 +351,6 @@ sub redirected { $_[0]->cb_request->redirected }
 
 sub abort {
     my ($self, $aborted_value) = @_;
-    # Should I use an accessor here?
     $self->cb_request->{_status} = $aborted_value;
     Params::Callback::Exception::Abort->throw
         ( error => ref $self . '->abort was called',
@@ -375,6 +377,7 @@ Params::Callback - Parameter callback base class
 Functional callback interface:
 
   sub my_callback {
+      # Sole argument is a Params::Callback object.
       my $cb = shift;
       my $params = $cb->params;
       my $value = $cb->value;
@@ -404,18 +407,18 @@ request. There are two ways to use Params::Callback: via functional-style
 callback subroutines and via object-oriented callback methods.
 
 For functional callbacks, a Params::Callback object is constructed by
-Params::CallbackRequest for each call to its C<request()> method, and passed in
+Params::CallbackRequest for each call to its C<request()> method, and passed
 as the sole argument for every execution of a callback function. See
-L<Params::CallbackRequest|Params::CallbackRequest> for details on how to create a
-Params::CallbackRequest object to execute your callback code.
+L<Params::CallbackRequest|Params::CallbackRequest> for details on how to
+create a Params::CallbackRequest object to execute your callback code.
 
 In the object-oriented callback interface, Params::Callback is the parent
 class from which all callback classes inherit. Callback methods are declared
 in such subclasses via C<Callback>, C<PreCallback>, and C<PostCallback>
 attributes to each method declaration. Methods and subroutines declared
 without one of these callback attributes are not callback methods, but normal
-methods or subroutines. Details on subclassing Params::Callback may be found
-in the L<subclassing|"SUBCLASSING"> section.
+methods or subroutines of the subclass. Read L<subclassing|"SUBCLASSING"> for
+details on subclassing Params::Callback.
 
 =head1 INTERFACE
 
@@ -441,15 +444,15 @@ object-oriented callback interface.
 
   my $cb_request = $cb->cb_request;
 
-Returns a reference to the Params::CallbackRequest object that
-executed the callback.
+Returns a reference to the Params::CallbackRequest object that executed the
+callback.
 
 =head3 params
 
   my $params = $cb->params;
 
-Returns a reference to the Mason request parameters hash. Any changes you make
-to this hash will propagate beyond the lifetime of the request.
+Returns a reference to the request parameters hash. Any changes you make to
+this hash will propagate beyond the lifetime of the request.
 
 =begin comment
 
@@ -469,9 +472,10 @@ arguments, then it will be the plain old L<Apache|Apache> object.
   my $priority = $cb->priority;
 
 Returns the priority level at which the callback was executed. Possible values
-are between "0" and "9", and may be set by a default priority setting, by the
+range from "0" to "9", and may be set by a default priority setting, by the
 callback configuration or method declaration, or by the parameter callback
-trigger key. See L<Params::CallbackRequest|Params::CallbackRequest> for details.
+trigger key. See L<Params::CallbackRequest|Params::CallbackRequest> for
+details.
 
 =head3 cb_key
 
@@ -515,13 +519,13 @@ Then the value returned by C<trigger_key()> method will be "MyCBs|save_cb6".
 
 B<Note:> Most browsers will submit "image" input fields with two arguments,
 one with ".x" appended to its name, and the other with ".y" appended to its
-name. Because Params::CallbackRequest is designed to be used with Web form fields
-populating a parameter hash, it will ignore these fields and either use the
-field that's named without the ".x" or ".y", or create a field with that name
-and give it a value of "1". The reasoning behind this approach is that the
-names of the callback-triggering fields should be the same as the names that
-appear in the HTML form fields. If you want the actual x and y image click
-coordinates, access them directly from the request parameters:
+name. Because Params::CallbackRequest is designed to be used with Web form
+fields populating a parameter hash, it will ignore these fields and either use
+the field that's named without the ".x" or ".y", or create a field with that
+name and give it a value of "1". The reasoning behind this approach is that
+the names of the callback-triggering fields should be the same as the names
+that appear in the HTML form fields. If you want the actual x and y image
+click coordinates, access them directly from the request parameters:
 
   my $params = $cb->params;
   my $trigger_key = $cb->trigger_key;
@@ -532,9 +536,9 @@ coordinates, access them directly from the request parameters:
 
   my $value = $cb->value;
 
-Returns the value of the callback trigger key. This value can be anything
-that can be stored in a hash value -- that is, any scalar value. Thus, in
-this example:
+Returns the value of the parameter that triggered the callback. This value can
+be anything that can be stored in a hash value -- that is, any scalar
+value. Thus, in this example:
 
   my $params = { "DEFAULT|save_cb" => 'Save',
                  "DEFAULT|open_cb" => [qw(one two)] };
@@ -544,11 +548,12 @@ reference C<['one', 'two']> in the open callback.
 
 Although you may often be able to retrieve the value directly from the hash
 reference returned by C<params()>, if multiple callback keys point to the same
-subroutine or if the form overrode the priority, you may not be able to
-determine which value was submitted for a particular callback execution. So
-Params::Callback kindly provides the value for you. The exception to this rule
-is values submitted under keys named for HTML "image" input fields. See the
-note about this under the documentation for the C<trigger_key()> method.
+subroutine or if the parameter that triggered the callback overrode the
+priority, you may not be able to determine which value was submitted for a
+particular callback execution. So Params::Callback kindly provides the value
+for you. The exception to this rule is values submitted under keys named for
+HTML "image" input fields. See the note about this under the documentation for
+the C<trigger_key()> method.
 
 =begin comment
 
@@ -670,14 +675,15 @@ such as this:
 
 Think of the part of the name preceding the pipe (the package key) as the
 class name, and the part of the name after the pipe (the callback key) as the
-method to call (plus '_cb'). If multiple parameter use the "MyHandler" class
+method to call (plus '_cb'). If multiple parameters use the "MyHandler" class
 key in a single request, then a single MyApp::CallbackHandler object instance
 will be used to execute each of those callback methods for that request.
 
 To configure your Params::CallbackRequest object to use this callback, use its
 C<cb_classes> constructor parameter:
 
-  my $cb_request = Params::CallbackRequest->new( cb_classes => [qw(MyHandler)] );
+  my $cb_request = Params::CallbackRequest->new
+    ( cb_classes => [qw(MyHandler)] );
   $cb_request->request($params);
 
 Now, there are a few of things to note in the above callback class example.
@@ -795,7 +801,8 @@ using the Perl C<\x{..}> notation. Again, just subclass:
 Now you can just tell Params::CallbackRequest to use your subclassed callback
 handler:
 
-  my $cb_request = Params::CallbackRequest->new( cb_classes => [qw(PerlEncode)] );
+  my $cb_request = Params::CallbackRequest->new
+    ( cb_classes => [qw(PerlEncode)] );
 
 Yeah, okay, you could just create a second pre-callback request callback to
 encode the Unicode characters using the Perl C<\x{..}> notation. But you get
