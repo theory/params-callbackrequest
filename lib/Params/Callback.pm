@@ -354,8 +354,8 @@ sub abort {
     my ($self, $aborted_value) = @_;
     $self->cb_request->{_status} = $aborted_value;
     Params::Callback::Exception::Abort->throw
-        ( error => ref $self . '->abort was called',
-          aborted_value => $aborted_value );
+      ( error         => ref $self . '->abort was called',
+        aborted_value => $aborted_value );
 }
 
 ##############################################################################
