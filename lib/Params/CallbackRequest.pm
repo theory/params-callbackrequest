@@ -877,7 +877,7 @@ important, first.
 Executes the callbacks specified when the Params::CallbackExec object was
 created. First, all pre-request callbacks are executed. Then, any
 parameter-triggered callbacks triggered by the keys in the parameter hash
-reference passed as the sole aregument are executed. And finally, all
+reference passed as the sole argument are executed. And finally, all
 post-request callbacks are executed.
 
 Any callback that calls C<abort()> on its Params::Callback object will prevent
