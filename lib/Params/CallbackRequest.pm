@@ -101,7 +101,7 @@ sub new {
     @p{qw(_cbs _pre _post)} = Params::Callback->_load_classes($p{cb_classes})
       if $p{cb_classes};
 
-    # Process argument-triggered callback specs.
+    # Process parameter-triggered callback specs.
     if (my $cb_specs = delete $p{callbacks}) {
         my %cbs;
         foreach my $spec (@$cb_specs) {
@@ -168,10 +168,10 @@ sub new {
 
 
 sub execute {
-    my ($self, $args) = @_;
-    return $self unless $args;
-    throw_bad_params "Parameter '$args' is not a hash reference"
-      unless UNIVERSAL::isa($args, 'HASH');
+    my ($self, $params) = @_;
+    return $self unless $params;
+    throw_bad_params "Parameter '$params' is not a hash reference"
+      unless UNIVERSAL::isa($params, 'HASH');
 
     # Use an array to store the callbacks according to their priorities. Why
     # an array when most of its indices will be undefined? Well, because I
@@ -189,7 +189,7 @@ sub execute {
     # that's the way it'll be.
     my (@cbs, %cbhs);
     if ($self->{_cbs}) {
-        foreach my $k (keys %$args) {
+        foreach my $k (keys %$params) {
             # Strip off the '.x' that an <input type="image" /> tag creates.
             (my $chk = $k) =~ s/\.x$//;
             if ((my $key = $chk) =~ s/_cb(\d?)$//) {
@@ -198,17 +198,17 @@ sub execute {
 
                 # Skip callbacks without values, if necessary.
                 next if $self->{ignore_nulls} &&
-                  (! defined $args->{$k} || $args->{$k} eq '');
+                  (! defined $params->{$k} || $params->{$k} eq '');
 
                 if ($chk ne $k) {
                     # Some browsers will submit $k.x and $k.y instead of just
                     # $k for <input type="image" />, a field that can only be
                     # submitted once for a given page. So skip it if we've
                     # already seen this arg.
-                    next if exists $args->{$chk};
-                    # Otherwise, add the unadorned key to $args with a true
+                    next if exists $params->{$chk};
+                    # Otherwise, add the unadorned key to $params with a true
                     # value.
-                    $args->{$chk} = 1;
+                    $params->{$chk} = 1;
                 }
 
                 # Find the package key and the callback key.
@@ -245,12 +245,12 @@ sub execute {
                 # Push the callback onto the stack, along with the parameters
                 # for the construction of the Params::Callback object that
                 # will be passed to it.
-                $cbhs{$class} ||= $class->new( params  => $args,
+                $cbhs{$class} ||= $class->new( params  => $params,
                                                cb_exec => $self,
                                              );
                 push @{$cbs[$priority]},
                   [ $cb, $cbhs{$class},
-                    [ $priority, $cb_key, $pkg_key, $chk, $args->{$k} ]
+                    [ $priority, $cb_key, $pkg_key, $chk, $params->{$k} ]
                   ];
             }
         }
@@ -258,7 +258,7 @@ sub execute {
 
     # Put any pre and post callbacks onto the stack.
     if ($self->{_pre} or $self->{_post}) {
-        my $params = [ params  => $args,
+        my $params = [ params  => $params,
                        cb_exec => $self ];
         unshift @cbs,
           [ map { [ $_->[0], $cbhs{$_} || $_->[1]->new(@$params), [] ] }
