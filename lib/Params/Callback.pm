@@ -173,6 +173,9 @@ sub Callback : ATTR(CODE, BEGIN) {
 
 sub PreCallback : ATTR(CODE, BEGIN) {
     my ($class, $symbol, $coderef) = @_;
+    # Just return if we've been here before. This is to prevent hiccups when
+    # mod_perl loads packages twice.
+    return if scalar keys %{$pres{$class}} > 0 && ! $pres{$class}->{__TMP};
     # Store a reference to the code in a temporary location and a pointer to
     # it in the array.
     push @reqs, $coderef;
@@ -181,6 +184,9 @@ sub PreCallback : ATTR(CODE, BEGIN) {
 
 sub PostCallback : ATTR(CODE, BEGIN) {
     my ($class, $symbol, $coderef) = @_;
+    # Just return if we've been here before. This is to prevent hiccups when
+    # mod_perl loads packages twice.
+    return if scalar keys %{$posts{$class}} > 0 && ! $posts{$class}->{__TMP};
     # Store a reference to the code in a temporary location and a pointer to
     # it in the array.
     push @reqs, $coderef;
