@@ -3,7 +3,7 @@ package Params::CallbackRequest;
 use strict;
 use Params::Validate ();
 use Params::Callback::Exceptions (abbr => [qw(throw_bad_params throw_bad_key
-                                              throw_cb_request)]);
+                                              throw_cb_exec)]);
 
 use vars qw($VERSION);
 $VERSION = 1.10;
@@ -38,7 +38,7 @@ my $valid_cb_classes = sub {
 my $exception_handler = sub {
     my $err = shift;
     rethrow_exception($err) if ref $err;
-    throw_cb_request error          => "Error thrown by callback: $err",
+    throw_cb_exec error          => "Error thrown by callback: $err",
                   callback_error => $err;
 };
 

@@ -17,7 +17,7 @@ use Exception::Class ( 'Params::Callback::Exception' =>
                        'Params::Callback::Exception::Execution' =>
 		       { isa         => 'Params::Callback::Exception',
                          description => 'Error thrown by callback',
-                         alias       => 'throw_cb_request',
+                         alias       => 'throw_cb_exec',
 			 fields      => [ qw(callback_key callback_error) ] },
 
                        'Params::Callback::Exception::Params' =>
@@ -81,8 +81,8 @@ Params::Callback::Exceptions - Parameter callback exception definitions
   use Params::Callback::Exceptions;
   Params::Callback::Exception::Execution->throw("Whoops!");
 
-  use Params::Callback::Exceptions abbr => [qw(throw_cb_request)];
-  throw_cb_request "Whoops!";
+  use Params::Callback::Exceptions abbr => [qw(throw_cb_exec)];
+  throw_cb_exec "Whoops!";
 
 =head1 DESCRIPTION
 
@@ -136,7 +136,7 @@ functional alias for its throw class method. These may be imported by passing
 an array reference of the names of the abbreviated functions to import via the
 C<abbr> parameter:
 
-  use Params::Callback::Exceptions abbr => [qw(throw_cb_request)];
+  use Params::Callback::Exceptions abbr => [qw(throw_cb_exec)];
 
 The names of the abbreviated functions are:
 
@@ -150,7 +150,7 @@ Params::Callback::Exception
 
 Params::Callback::Exception::InvalidKey
 
-=item throw_cb_request
+=item throw_cb_exec
 
 Params::Callback::Exception::Execution
 
@@ -191,7 +191,7 @@ attributes offered by Exception::Class::Base, this class also features the
 attributes C<callback_key>, which corresponds to the parameter key that
 triggered the callback, and C<callback_error> which is the error thrown by the
 callback subroutine or method. Params::Callback::Exception::Execution's
-functional alias is C<throw_cb_request>.
+functional alias is C<throw_cb_exec>.
 
 =head3 Params::Callback::Exception::Params
 

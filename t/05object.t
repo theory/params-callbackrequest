@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 05object.t,v 1.3 2003/08/18 23:56:09 david Exp $
+# $Id: 05object.t,v 1.4 2003/08/18 23:59:41 david Exp $
 
 use strict;
 use Test::More;
@@ -29,7 +29,7 @@ package Params::Callback::TestObjects;
 use strict;
 use base 'Params::Callback';
 __PACKAGE__->register_subclass( class_key => $base_key);
-use Params::Callback::Exceptions abbr => [qw(throw_cb_request)];
+use Params::Callback::Exceptions abbr => [qw(throw_cb_exec)];
 
 sub simple : Callback {
     my $self = shift;
@@ -111,7 +111,7 @@ sub exception : Callback {
     my $self = shift;
     if ($self->value) {
         # Throw an exception object.
-        throw_cb_request $err_msg;
+        throw_cb_exec $err_msg;
     } else {
         # Just die.
         die $err_msg;
