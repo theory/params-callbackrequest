@@ -24,4 +24,4 @@ provides:
   Params::CallbackRequest::Exceptions:
     file: lib/Params/CallbackRequest/Exceptions.pm
     version: 1.1
-generated_by: Module::Build version 0.19_05
+generated_by: Module::Build version 0.20
