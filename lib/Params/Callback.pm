@@ -571,8 +571,8 @@ Params::Callback offers has a few other publicly accessible methods.
 =head3 redirect
 
   $cb->redirect($url);
-  $cb->redirect($url, $status);
-  $cb->redirect($url, $status, $wait);
+  $cb->redirect($url, $wait);
+  $cb->redirect($url, $wait, $status);
 
 This method can be used to redirect a request in a mod_perl environment,
 provided that an Apache request object has been passed to
