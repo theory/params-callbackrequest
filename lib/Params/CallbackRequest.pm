@@ -2,8 +2,9 @@ package Params::CallbackRequest;
 
 use strict;
 use Params::Validate ();
-use Params::CallbackRequest::Exceptions (abbr => [qw(throw_bad_params throw_bad_key
-                                              throw_cb_exec)]);
+use Params::CallbackRequest::Exceptions (abbr => [qw(throw_bad_params
+                                                     throw_bad_key
+                                                     throw_cb_exec)]);
 
 use vars qw($VERSION);
 $VERSION = 1.10;
@@ -295,10 +296,13 @@ sub request {
         # Just pass exception objects to the exception handler unless it's
         # an abort.
         rethrow_exception($err) unless isa_cb_exception($err, 'Abort');
+        # Clean out the redircted attribute, and return the abort status.
+        delete $self->{redirected};
+        return delete $self->{_status};
     }
 
-    # We now return to normal processing.
-    return $self;
+    # Either return the status code or $self.
+    return exists $self->{_status} ? delete $self->{_status} : $self;
 }
 
 1;
@@ -886,9 +890,11 @@ important, first.
   $cb_request->request(\%params, @args);
 
 Executes the callbacks specified when the Params::CallbackRequest object was
-created. It takes a single required argument, a hash reference of
-parameters. Any subsequent arguments are passed to the constructor for each
-callback class for which callbacks will be executed.
+created. It takes a single required argument, a hash reference of parameters.
+Any subsequent arguments are passed to the constructor for each callback class
+for which callbacks will be executed. Returns the Params::CallbackRequest
+object on success, or the code passed to Params::Callback's C<abort()> method
+if callback execution was aborted.
 
 A single call to C<request()> is referred to as a "callback request"
 (naturally!). First, all pre-request callbacks are executed. Then, any
