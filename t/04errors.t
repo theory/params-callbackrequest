@@ -1,9 +1,9 @@
 #!perl -w
 
-# $Id: 04errors.t,v 1.4 2003/08/18 23:56:09 david Exp $
+# $Id: 04errors.t,v 1.5 2003/08/25 03:26:01 david Exp $
 
 use strict;
-use Test::More tests => 50;
+use Test::More tests => 51;
 
 BEGIN { use_ok('Params::CallbackRequest') }
 
@@ -164,7 +164,8 @@ ok( $cb_request = Params::CallbackRequest->new
       exception_handler => sub {
           like( $_[0], qr/^Ouch! at/, "Custom check our die message" );
       }), "Construct CBExec object with custom exception handler" );
-eval { $cb_request->request(\%params) };
+ok( $cb_request->request(\%params),
+    "Execute callbacks with exception handler" );
 
 
 1;

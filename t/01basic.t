@@ -1,9 +1,9 @@
 #!perl -w
 
-# $Id: 01basic.t,v 1.9 2003/08/20 05:03:37 david Exp $
+# $Id: 01basic.t,v 1.10 2003/08/25 03:26:01 david Exp $
 
 use strict;
-use Test::More tests => 57;
+use Test::More tests => 60;
 
 BEGIN { use_ok('Params::CallbackRequest') }
 

@@ -276,8 +276,6 @@ sub request {
 
     # Now execute the callbacks.
     eval {
-        # Install the custom exception handler.
-        local $SIG{__DIE__} = $self->{exception_handler};
         foreach my $cb_list (@cbs) {
             # Skip it if there are no callbacks for this priority.
             next unless $cb_list;
@@ -297,11 +295,10 @@ sub request {
     my $status = delete $self->{_status};
 
     if (my $err = $@) {
-        # Just pass exception objects to the exception handler unless it's
-        # an abort.
-        rethrow_exception($err) unless isa_cb_exception($err, 'Abort');
-        # There's a status to return.
-        return $status;
+        # Just pass the exception to the exception handler unless it's an
+        # abort.
+        return $status if isa_cb_exception($err, 'Abort');
+        $self->{exception_handler}->($err);
     }
 
     # We now return to normal processing.
@@ -513,13 +510,13 @@ callback, including the callback key, the package key, and the parameter
 hash. It also includes an C<abort()> method. See the
 L<Params::Callback|Params::Callback> documentation for all the goodies.
 
-Note that Params::CallbackRequest installs an exception handler in
-C<$SIG{__DIE__}> during the execution of callbacks, so if any of your callback
-subroutines C<die>, Params::CallbackRequest will throw an
-Params::Callback::Exception::Execution exception. If your callback subroutines
-throw their own exception objects, Params::CallbackRequest will simply rethrow
-them. If you don't like this configuration, use the C<exception_handler>
-parameter to C<new()> to install your own exception handler.
+Note that Params::CallbackRequest installs an exception handler during the
+execution of callbacks, so if any of your callback subroutines C<die>,
+Params::CallbackRequest will throw an Params::Callback::Exception::Execution
+exception. If your callback subroutines throw their own exception objects,
+Params::CallbackRequest will simply rethrow them. If you don't like this
+configuration, use the C<exception_handler> parameter to C<new()> to install
+your own exception handler.
 
 =head3 Object-Oriented Callback Methods
 
@@ -541,8 +538,8 @@ like this:
   }
 
 As with functional callback subroutines, method callbacks are executed with a
-custom C<$SIG{__DIE__}> exception handler. Again see the C<exception_handler>
-parameter to install your own exception handler.
+custom exception handler. Again see the C<exception_handler> parameter to
+install your own exception handler.
 
 B<Note:> Under mod_perl, it's important that you C<use> any and all
 Params::Callback subclasses I<before> you C<use Params::CallbackRequest>. This
@@ -747,7 +744,7 @@ callbacks -- or to all other class callbacks with the same class key -- in a
 single request.
 
 Like the parameter-triggered callbacks, request callbacks run under the nose
-of a custom C<$SIG{__DIE__}> exception handler, so if any of them C<die>s, an
+of a custom exception handler, so if any of them C<die>s, an
 Params::Callback::Exception::Execution exception will be thrown. Use the
 C<exception_handler> parameter to C<new()> if you don't like this.
 
@@ -868,9 +865,9 @@ with a true value. It is set to a false value by default.
 
 =item C<exception_handler>
 
-Params::CallbackRequest installs a custom exception handler into C<$SIG{__DIE__}>
-during the execution of callbacks. This custom exception handler will simply
-rethrow any exception objects it comes across, but will throw a
+Params::CallbackRequest installs a custom exception handler during the
+execution of callbacks. This custom exception handler will simply rethrow any
+exception objects it comes across, but will throw a
 Params::Callback::Exception::Execution exception object if it is passed only a
 string value (such as is passed by C<die "fool!">).
 
