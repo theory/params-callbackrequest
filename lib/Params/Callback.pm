@@ -17,6 +17,8 @@ Params::Validate::validation_options
 
 my $is_num = { 'valid priority' => sub { $_[0] =~ /^\d$/ } };
 
+# Use Apache::RequestRec for mod_perl 2
+my $ap_req_class = $mod_perl::VERSION < 1.99 ? 'Apache' : 'Apache::RequestRec';
 
 BEGIN {
     # The object-oriented interface is only supported with the use of
@@ -56,7 +58,7 @@ my %valid_params =
     },
 
     apache_req   =>
-    { isa        => 'Apache',
+    { isa        => $ap_req_class,
       optional   => 1,
     },
 
