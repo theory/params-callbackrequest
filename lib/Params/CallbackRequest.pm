@@ -7,7 +7,7 @@ use Params::CallbackRequest::Exceptions (abbr => [qw(throw_bad_params
                                                      throw_cb_exec)]);
 
 use vars qw($VERSION);
-$VERSION = '1.11';
+$VERSION = '1.12';
 
 BEGIN {
     for my $attr (qw( default_priority
@@ -31,8 +31,7 @@ my $valid_cb_classes = sub {
     return 1 if $_[0]->[0] ne '_ALL_';
     # Return false if there's more than one element in the array.
     return if @{$_[0]} > 1;
-    # Change the value from an array to "ALL"!
-    $_[0] = 'ALL';
+    # Just return true.
     return 1;
 };
 

@@ -1,5 +1,10 @@
 Revision history for Perl extension Params::CallbackRequest.
 
+1.12
+      - No longer using a Params::Validate callback to transform a value,
+        since that's not a supported feature of Params::Validate and it led
+        to problems on some platforms.
+
 1.11  Wed Oct  8 19:27:32 2003
       - Fixed execution of pre and post callbacks so that they execute in the
         order in which they're declared. Thanks to Perl 5.8.1 for rubbing my

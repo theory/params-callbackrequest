@@ -5,7 +5,7 @@ use Params::Validate ();
 use Params::CallbackRequest::Exceptions (abbr => [qw(throw_bad_params)]);
 
 use vars qw($VERSION);
-$VERSION = '1.11';
+$VERSION = '1.12';
 use constant DEFAULT_PRIORITY => 5;
 use constant REDIRECT => 302;
 
@@ -310,8 +310,11 @@ sub _load_classes {
     return unless defined $ckeys;
     my ($cbs, $pres, $posts);
     # Process the class keys in the order they're given, or just do all of
-    # them if $ckeys eq 'ALL' (checked by Params::CallbackRequest).
-    foreach my $ckey (ref $ckeys ? @$ckeys : keys %classes) {
+    # them if $ckeys eq 'ALL' or $ckeys->[0]  eq '_ALL_' (checked by
+    # Params::CallbackRequest).
+    foreach my $ckey (ref $ckeys && $ckeys->[0] ne '_ALL_'
+                      ? @$ckeys
+                      : keys %classes) {
         my $class = $classes{$ckey} or
           die "Class with class key '$ckey' not loaded. Did you forget use"
             . " it or to call register_subclass()?";
