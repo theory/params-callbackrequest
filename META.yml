@@ -1,8 +1,11 @@
 --- #YAML:1.0
 name: Params-CallbackRequest
-version: 1.11
+version: 1.12
+author:
+  - David Wheeler <david@kineticode.com>
+abstract: |-
+  Functional and object-oriented callback architecture
 license: perl
-distribution_type: module
 requires:
   Exception::Class: 1.10
   Params::Validate: 0.59
@@ -13,15 +16,14 @@ recommends:
   perl: 5.6.0
 build_requires:
   Test::Simple: 0.17
-conflicts: {}
 provides:
   Params::Callback:
     file: lib/Params/Callback.pm
-    version: 1.11
+    version: 1.12
   Params::CallbackRequest:
     file: lib/Params/CallbackRequest.pm
-    version: 1.11
+    version: 1.12
   Params::CallbackRequest::Exceptions:
     file: lib/Params/CallbackRequest/Exceptions.pm
     version: 1.11
-generated_by: Module::Build version 0.20
+generated_by: Module::Build version 0.24
