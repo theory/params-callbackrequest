@@ -875,7 +875,8 @@ important, first.
   $cb_exec->execute(\%params);
 
 Executes the callbacks specified when the Params::CallbackExec object was
-created. First, all pre-request callbacks are executed. Then, any
+created. A single call to C<execute()> is referred to as a callback
+request. First, all pre-request callbacks are executed. Then, any
 parameter-triggered callbacks triggered by the keys in the parameter hash
 reference passed as the sole argument are executed. And finally, all
 post-request callbacks are executed.
