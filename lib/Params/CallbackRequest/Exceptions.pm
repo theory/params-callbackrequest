@@ -53,7 +53,7 @@ sub import {
 
 
 
-sub isa_cb_exception {
+sub isa_cb_exception ($;$) {
     my ($err, $name) = @_;
     return unless defined $err;
 
@@ -62,7 +62,7 @@ sub isa_cb_exception {
     return UNIVERSAL::isa($err, $class);
 }
 
-sub rethrow_exception {
+sub rethrow_exception ($) {
     my $err = shift or return;
     $err->rethrow if UNIVERSAL::can($err, 'rethrow');
     die $err if ref $err;
