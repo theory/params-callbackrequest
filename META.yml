@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name: Params-CallbackRequest
-version: 1.12
+version: 1.13
 author:
   - David Wheeler <david@kineticode.com>
 abstract: |-
@@ -19,11 +19,11 @@ build_requires:
 provides:
   Params::Callback:
     file: lib/Params/Callback.pm
-    version: 1.12
+    version: 1.13
   Params::CallbackRequest:
     file: lib/Params/CallbackRequest.pm
-    version: 1.12
+    version: 1.13
   Params::CallbackRequest::Exceptions:
     file: lib/Params/CallbackRequest/Exceptions.pm
-    version: 1.11
+    version: 1.13
 generated_by: Module::Build version 0.24
