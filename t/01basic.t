@@ -1,9 +1,9 @@
 #!perl -w
 
-# $Id: 01basic.t,v 1.1 2003/08/14 02:05:47 david Exp $
+# $Id: 01basic.t,v 1.2 2003/08/14 05:23:22 david Exp $
 
 use strict;
-use Test::More tests => 31;
+use Test::More tests => 45;
 
 BEGIN { use_ok('Params::CallbackExec') }
 
@@ -126,10 +126,49 @@ push @$cbs, { pkg_key => $key,
             };
 
 ##############################################################################
+# We'll use this callback just to grab the value of the "submit" parameter.
+sub submit {
+    my $cb = shift;
+    isa_ok( $cb, 'Params::Callback');
+    my $params = $cb->params;
+    $params->{result} = $params->{submit};
+}
+
+push @$cbs, { pkg_key => $key,
+              cb_key  => 'submit',
+              cb      => \&submit
+            };
+
+##############################################################################
+# We'll use this callback to change the result to uppercase.
+sub upper {
+    my $cb = shift;
+    my $params = $cb->params;
+    if ($params->{do_upper}) {
+        isa_ok( $cb, 'Params::Callback');
+        $params->{result} = uc $params->{result};
+    }
+}
+
+##############################################################################
+# We'll use this callback to flip the characters of the "submit" parameter.
+# The value of the "submit" parameter won't be "racecar!"
+sub flip {
+    my $cb = shift;
+    my $params = $cb->params;
+    if ($params->{do_flip}) {
+        isa_ok( $cb, 'Params::Callback');
+        $params->{submit} = reverse $params->{submit};
+    }
+}
+
+##############################################################################
 # Construct the CallbackExec object.
 ##############################################################################
 
-ok( my $cb_exec = Params::CallbackExec->new( callbacks => $cbs),
+ok( my $cb_exec = Params::CallbackExec->new( callbacks      => $cbs,
+                                             post_callbacks => [\&upper],
+                                             pre_callbacks  => [\&flip] ),
     "Construct CBExec object" );
 isa_ok($cb_exec, 'Params::CallbackExec' );
 
@@ -199,6 +238,38 @@ is( $params{result}, 'aborted', "Check abort result" );
 %params = ( "$key|test_aborted_cb" => 1 );
 ok( $cb_exec->execute(\%params), "Execute aborted callback" );
 is( $params{result}, 'yes', "Check aborted result" );
+
+##############################################################################
+# Test the pre-execution callbacks.
+my $string = 'yowza';
+%params = ( "$key|submit_cb" => 1,
+            submit           => $string,
+            do_flip         => 1 );
+ok( $cb_exec->execute(\%params), "Execute pre callback" );
+is( $params{result}, reverse($string), "Check pre result" );
+
+
+##############################################################################
+# Test the post-execution callbacks.
+%params = ( "$key|simple_cb" => 1,
+            do_upper => 1 );
+ok( $cb_exec->execute(\%params), "Execute post callback" );
+is( $params{result}, 'SUCCESS', "Check post result" );
+
+##############################################################################
+# Now make sure that a callback with a value executes.
+ok( my $new_cb_exec = Params::CallbackExec->new( callbacks           => $cbs,
+                                                 exec_null_cb_values => 0),
+    "Create new CBExec that ignores nulls" );
+%params = ( "$key|simple_cb" => 1);
+ok( $new_cb_exec->execute(\%params), "Execute simple callback" );
+is( $params{result}, 'Success', "Check simple result" );
+
+# And try it with a null value.
+%params = ( "$key|simple_cb" => '');
+ok( $new_cb_exec->execute(\%params), "Execute null simple callback" );
+is( $params{result}, undef, "Check null simple result" );
+
 
 1;
 __END__
