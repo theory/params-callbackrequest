@@ -1,9 +1,9 @@
 #!perl -w
 
-# $Id: 01basic.t,v 1.2 2003/08/14 05:23:22 david Exp $
+# $Id: 01basic.t,v 1.3 2003/08/15 22:59:00 david Exp $
 
 use strict;
-use Test::More tests => 45;
+use Test::More tests => 50;
 
 BEGIN { use_ok('Params::CallbackExec') }
 
@@ -258,8 +258,8 @@ is( $params{result}, 'SUCCESS', "Check post result" );
 
 ##############################################################################
 # Now make sure that a callback with a value executes.
-ok( my $new_cb_exec = Params::CallbackExec->new( callbacks           => $cbs,
-                                                 exec_null_cb_values => 0),
+ok( my $new_cb_exec = Params::CallbackExec->new( callbacks    => $cbs,
+                                                 ignore_nulls => 1),
     "Create new CBExec that ignores nulls" );
 %params = ( "$key|simple_cb" => 1);
 ok( $new_cb_exec->execute(\%params), "Execute simple callback" );
@@ -269,6 +269,16 @@ is( $params{result}, 'Success', "Check simple result" );
 %params = ( "$key|simple_cb" => '');
 ok( $new_cb_exec->execute(\%params), "Execute null simple callback" );
 is( $params{result}, undef, "Check null simple result" );
+
+# And with undef.
+%params = ( "$key|simple_cb" => undef);
+ok( $new_cb_exec->execute(\%params), "Execute undef simple callback" );
+is( $params{result}, undef, "Check undef simple result" );
+
+# But 0 should succeed.
+%params = ( "$key|simple_cb" => 0);
+ok( $new_cb_exec->execute(\%params), "Execute 0 simple callback" );
+is( $params{result}, 'Success', "Check 0 simple result" );
 
 
 1;

@@ -76,9 +76,9 @@ my %valid_params =
       optional  => 1,
     },
 
-    exec_null_cb_values =>
+    ignore_nulls =>
     { type      => Params::Validate::BOOLEAN,
-      default   => 1,
+      default   => 0,
     },
 
     cb_exception_handler =>
@@ -197,8 +197,8 @@ sub execute {
                 my $priority = $1;
 
                 # Skip callbacks without values, if necessary.
-                next unless $self->{exec_null_cb_values} ||
-                  (defined $args->{$k} && $args->{$k} ne '');
+                next if $self->{ignore_nulls} &&
+                  (! defined $args->{$k} || $args->{$k} eq '');
 
                 if ($chk ne $k) {
                     # Some browsers will submit $k.x and $k.y instead of just
