@@ -1,5 +1,5 @@
-Params/CallbackRequest version 1.10
-================================
+Params/CallbackRequest version 1.11
+===================================
 
 Params::CallbackRequest provides functional and object-oriented callbacks to
 method and function parameters. Callbacks may be either code references

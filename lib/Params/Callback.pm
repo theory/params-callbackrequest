@@ -5,7 +5,7 @@ use Params::Validate ();
 use Params::CallbackRequest::Exceptions (abbr => [qw(throw_bad_params)]);
 
 use vars qw($VERSION);
-$VERSION = '1.10';
+$VERSION = '1.11';
 use constant DEFAULT_PRIORITY => 5;
 use constant REDIRECT => 302;
 
@@ -175,22 +175,22 @@ sub PreCallback : ATTR(CODE, BEGIN) {
     my ($class, $symbol, $coderef) = @_;
     # Just return if we've been here before. This is to prevent hiccups when
     # mod_perl loads packages twice.
-    return if keys %{$pres{$class}} and not $pres{$class}->{__TMP};
+    return if $pres{$class} and ref $pres{$class}->[0];
     # Store a reference to the code in a temporary location and a pointer to
     # it in the array.
     push @reqs, $coderef;
-    push @{$pres{$class}->{__TMP}}, $#reqs;
+    push @{$pres{$class}}, $#reqs;
 }
 
 sub PostCallback : ATTR(CODE, BEGIN) {
     my ($class, $symbol, $coderef) = @_;
     # Just return if we've been here before. This is to prevent hiccups when
     # mod_perl loads packages twice.
-    return if keys %{$posts{$class}} and not $posts{$class}->{__TMP};
+    return if $posts{$class} and ref $posts{$class}->[0];
     # Store a reference to the code in a temporary location and a pointer to
     # it in the array.
     push @reqs, $coderef;
-    push @{$posts{$class}->{__TMP}}, $#reqs;
+    push @{$posts{$class}}, $#reqs;
 }
 
 ##############################################################################
@@ -216,17 +216,14 @@ sub _find_names {
         foreach my $type (\%pres, \%posts) {
             # We've stored an index pointing to each method in the @reqs
             # array under __TMP in PreCallback() and PostCallback().
-            if (my $idxs = delete $type->{$class}{__TMP}) {
-                foreach my $idx (@$idxs) {
-                    my $code = $reqs[$idx];
-                    # Grab the symbol hash for this code reference.
-                    my $sym = Attribute::Handlers::findsym($class, $code)
-                      or die "Anonymous subroutines not supported. Make " .
-                        "sure that Params::CallbackRequest loads last";
-                    # Params::CallbackRequest wants this array reference.
-                    $type->{$class}{*{$sym}{NAME}} = [ sub { goto $code },
-                                                       $class ];
-                }
+            for (@{$type->{$class}}) {
+                my $code = $reqs[$_];
+                # Grab the symbol hash for this code reference.
+                my $sym = Attribute::Handlers::findsym($class, $code)
+                  or die "Anonymous subroutines not supported. Make " .
+                  "sure that Params::CallbackRequest loads last";
+                # Params::CallbackRequest wants an array reference.
+                $_ = [ sub { goto $code }, $class, *{$sym}{NAME} ];
             }
         }
         # Copy any request callbacks from their parent classes. This is to
@@ -250,30 +247,31 @@ sub _find_names {
 
 sub _copy_meths {
     my $class = shift;
-    my %seen;
+    my %seen_class;
     # Grab all of the super classes.
     foreach my $super (grep { UNIVERSAL::isa($_, __PACKAGE__) }
                        Class::ISA::super_path($class)) {
         # Skip classes we've already seen.
-        unless ($seen{$super}) {
+        unless ($seen_class{$super}) {
             # Copy request callback code references.
             foreach my $type (\%pres, \%posts) {
                 if ($type->{$class} and $type->{$super}) {
                     # Copy the methods, but allow newer ones to override.
-                    $type->{$class} = { %{ $type->{$super} },
-                                        %{ $type->{$class} }
-                                      };
+                    my %seen_meth;
+                    $type->{$class} =
+                      [ grep { not $seen_meth{$_->[2]}++ }
+                        @{$type->{$class}}, @{$type->{$super}} ];
                 } elsif ($type->{$super}) {
                     # Just copy the methods.
-                    $type->{$class} = { %{ $type->{$super} }};
+                    $type->{$class} = [ @{ $type->{$super} } ];
                 }
             }
-            $seen{$super} = 1;
+            $seen_class{$super} = 1;
         }
     }
 
     # Return an array ref of the super classes.
-    return [keys %seen];
+    return [keys %seen_class];
 }
 
 ##############################################################################
@@ -327,8 +325,8 @@ sub _load_classes {
         # Load request callbacks in the order they're defined. Methods
         # inherited from parents have already been copied, so don't worry
         # about them.
-        push @$pres, values %{ $pres{$class} } if $pres{$class};
-        push @$posts, values %{ $posts{$class} } if $posts{$class};
+        push @$pres, @{ $pres{$class} } if $pres{$class};
+        push @$posts, @{ $posts{$class} } if $posts{$class};
     }
     return ($cbs, $pres, $posts);
 }

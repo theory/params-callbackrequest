@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 06object_request.t,v 1.2 2003/08/18 23:56:09 david Exp $
+# $Id: 06object_request.t,v 1.3 2003/10/08 19:27:06 david Exp $
 
 use strict;
 use Test::More;
@@ -188,7 +188,7 @@ is( $params{result}, 'lower me precallback Overridden PostCallback',
 %params = (do_upper => 1,
            result   => 'taKe mE uP aGain!');
 ok( $cb_request->request(\%params), "Execute subclassed pre callback" );
-is( $params{result}, 'TAKE ME UP AGAIN! PRECALLBACK Overridden PostCallback',
+is( $params{result}, 'TAKE ME UP AGAIN! Overridden PreCallback PostCallback',
     "Check subclassed pre callback result" );
 
 ##############################################################################
