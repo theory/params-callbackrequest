@@ -60,6 +60,11 @@ my %valid_params =
       optional   => 1,
     },
 
+    cgi_object   =>
+    { isa        => 'CGI',
+      optional   => 1,
+    },
+
     priority =>
     { type      => Params::Validate::SCALAR,
       callbacks => $is_num,
@@ -332,14 +337,17 @@ sub _load_classes {
 sub redirect {
     my ($self, $url, $wait, $status) = @_;
     $status ||= REDIRECT;
+    my $cb_request = $self->cb_request;
+    $cb_request->{_status} = $status;
+    $cb_request->{redirected} = $url;
+
     if (my $r = $self->apache_req) {
         $r->method('GET');
         $r->headers_in->unset('Content-length');
         $r->err_header_out( Location => $url );
+    } elsif (my $cgi = $self->{cgi_object}) {
+        $cgi->redirect($url);
     }
-    my $cb_request = $self->cb_request;
-    $cb_request->{_status} = $status;
-    $cb_request->{redirected} = $url;
     $self->abort($status) unless $wait;
 }
 
