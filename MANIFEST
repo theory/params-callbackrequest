@@ -9,4 +9,5 @@ t/01basic.t
 t/02priority.t
 t/03keys.t
 t/04errors.t
+t/05object.t
 t/09pod.t

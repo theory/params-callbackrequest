@@ -22,8 +22,10 @@ BEGIN {
     # that we can tell ApacheHandler::WithCallbacks that they exist and
     # are loaded.
     unless ($] < 5.006) {
-        require Attribute::Handlers;
-        require Class::ISA;
+        eval {
+            require Attribute::Handlers;
+            require Class::ISA;
+        }
     }
 
     for my $attr (qw( cb_exec
