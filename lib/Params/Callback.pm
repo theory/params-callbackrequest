@@ -5,7 +5,7 @@ use Params::Validate ();
 use Params::CallbackRequest::Exceptions (abbr => [qw(throw_bad_params)]);
 
 use vars qw($VERSION);
-$VERSION = '1.12';
+$VERSION = '1.13';
 use constant DEFAULT_PRIORITY => 5;
 use constant REDIRECT => 302;
 
