@@ -865,7 +865,34 @@ a code reference to do what you need.
 
 =back
 
-=head2 Accessor Methods
+=head2 Instance Methods
+
+Params::CallbackExec of course has several instance methods. I cover the most
+important, first.
+
+=head3 C<execute()>
+
+  $cb_exec->execute(\%params);
+
+Executes the callbacks specified when the Params::CallbackExec object was
+created. First, all pre-request callbacks are executed. Then, any
+parameter-triggered callbacks triggered by the keys in the parameter hash
+reference passed as the sole aregument are executed. And finally, all
+post-request callbacks are executed.
+
+Any callback that calls C<abort()> on its Params::Callback object will prevent
+any other callbacks scheduled to run subsequent to its execution from being
+executed. Furthermore, any callback that C<die>s or throws an exception will
+of course also prevent any subsequent callbacks from executing, and in
+addition must also be caught by the caller or the whole process will
+terminate:
+
+  eval { $cb_exec->execute(\%params) };
+  if (my $err = $@) {
+      # Handle exception.
+  }
+
+=head3 Accessor Methods
 
 The properties C<default_priority> and C<default_pkg_key> have standard
 read-only accessor methods of the same name. For example:
