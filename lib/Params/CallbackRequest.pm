@@ -2,7 +2,8 @@ package Params::CallbackExec;
 
 use strict;
 use Params::Validate ();
-use Params::Callback::Exceptions (abbr => [qw(throw_bad_params)]);
+use Params::Callback::Exceptions (abbr => [qw(throw_bad_params throw_no_cb
+                                              throw_cb_exec)]);
 
 use vars qw($VERSION);
 $VERSION = 1.10;
@@ -37,9 +38,8 @@ my $valid_cb_classes = sub {
 my $exception_handler = sub {
     my $err = shift;
     rethrow_exception($err) if ref $err;
-    Params::Callback::Exception::Execution->throw
-      ( error => "Error thrown by callback: $err",
-        callback_error => $err );
+    throw_cb_exec error          => "Error thrown by callback: $err",
+                  callback_error => $err;
 };
 
 # Set up the valid parameters to new().
@@ -183,10 +183,10 @@ sub execute {
     # differences compared to the work that the callbacks will likely be
     # doing, anyway. And in the meantime, the array is just easier to use,
     # since the priorities are just numbers, and its easist to unshift and
-    # push on the pre- and post- request callbacks than to stick them onto a
-    # hash. In short, the use of arrays is cleaner, easier to read and
-    # maintain, and almost always just as fast or faster than using hashes. So
-    # that's the way it'll be.
+    # push on the global callbacks than to stick them onto a hash. In short,
+    # the use of arrays is cleaner, easier to read and maintain, and almost
+    # always just as fast or faster than using hashes. So that's the way it'll
+    # be.
     my (@cbs, %cbhs);
     if ($self->{_cbs}) {
         foreach my $k (keys %$params) {
@@ -218,16 +218,16 @@ sub execute {
                 # Find the callback.
                 my $cb;
                 my $class = $self->{_cbs}{$pkg_key} or
-                  Params::Callback::Exception::InvalidKey->throw
-                    ( error   => "No such callback package '$pkg_key'",
-                      callback_key => $chk );
+                  throw_no_cb error        => "No such callback package " .
+                                              "'$pkg_key'",
+                              callback_key => $chk;
 
                 if (ref $class) {
                     # It's a functional callback. Grab it.
                     $cb = $class->{$cb_key}{cb} or
-                      Params::Callback::Exception::InvalidKey->throw
-                        ( error   => "No callback found for callback key '$chk'",
-                          callback_key => $chk );
+                      throw_no_cb error        => "No callback found for " .
+                                                  "callback key '$chk'",
+                                  callback_key => $chk;
 
                     # Get the specified priority if none was included in the
                     # callback key.
@@ -237,9 +237,9 @@ sub execute {
                 } else {
                     # It's a method callback. Get it from the class.
                     $cb = $class->_get_callback($cb_key, \$priority) or
-                      Params::Callback::Exception::InvalidKey->throw
-                        ( error   => "No callback found for callback key '$chk'",
-                          callback_key => $chk );
+                      throw_no_cb error        => "No callback found for " .
+                                                   "callback key '$chk'",
+                                  callback_key => $chk;
                 }
 
                 # Push the callback onto the stack, along with the parameters
@@ -256,7 +256,7 @@ sub execute {
         }
     }
 
-    # Put any pre and post callbacks onto the stack.
+    # Put any pre and post global callbacks onto the stack.
     if ($self->{_pre} or $self->{_post}) {
         my $params = [ params  => $params,
                        cb_exec => $self ];
@@ -273,6 +273,7 @@ sub execute {
 
     # Now execute the callbacks.
     eval {
+        # Install the custom exception handler.
         local $SIG{__DIE__} = $self->{exception_handler};
         foreach my $cb_list (@cbs) {
             # Skip it if there are no callbacks for this priority.
