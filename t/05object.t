@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 05object.t,v 1.5 2003/08/19 16:06:50 david Exp $
+# $Id: 05object.t,v 1.6 2003/08/19 17:26:36 david Exp $
 
 use strict;
 use Test::More;
@@ -96,14 +96,14 @@ sub chk_priority : Callback {
 
 sub test_abort : Callback {
     my $self = shift;
-    $self->abort;
+    $self->abort(1);
 }
 
 sub test_aborted : Callback {
     my $self = shift;
     my $params = $self->params;
     my $val = $self->value;
-    eval { $self->abort } if $val;
+    eval { $self->abort(1) } if $val;
     $params->{result} = $self->aborted($@) ? 'yes' : 'no';
 }
 

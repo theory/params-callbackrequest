@@ -616,7 +616,7 @@ exceptions, you need to make sure to rethrow these exceptions, like this:
 
 Aborts the current request without executing any more callbacks. The
 C<$status> argument specifies a request status code to be returned to by
-C<aborted()>.
+C<< Params::CallbackRequest->request() >>.
 
 C<abort()> is implemented by throwing a Params::Callback::Exception::Abort
 object and can thus be caught by C<eval{}>. The C<aborted()> method is a

@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 01basic.t,v 1.7 2003/08/19 16:53:23 david Exp $
+# $Id: 01basic.t,v 1.8 2003/08/19 17:26:36 david Exp $
 
 use strict;
 use Test::More tests => 57;
@@ -102,7 +102,7 @@ sub test_abort {
     isa_ok( $cb, 'Params::Callback');
     my $params = $cb->params;
     $params->{result} = 'aborted';
-    $cb->abort;
+    $cb->abort(1);
 }
 
 push @$cbs, { pkg_key => $key,
@@ -117,7 +117,7 @@ sub test_aborted {
     isa_ok( $cb, 'Params::Callback');
     my $params = $cb->params;
     my $val = $cb->value;
-    eval { $cb->abort } if $val;
+    eval { $cb->abort(1) } if $val;
     $params->{result} = $cb->aborted($@) ? 'yes' : 'no';
 }
 
