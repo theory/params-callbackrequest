@@ -1010,8 +1010,7 @@ independent of previous implementations.
 
 =head1 BUGS
 
-Please report all bugs via the CPAN Request Tracker at
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Params-CallbackRequest>.
+Please send bug reports to <bug-params-callbackrequest@rt.cpan.org>.
 
 =head1 SEE ALSO
 
