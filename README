@@ -18,7 +18,14 @@ the request before the templating system handles it.
 
 INSTALLATION
 
-To install this module type the following:
+To install this module, type the following:
+
+   perl Build.PL
+   ./Build
+   ./Build test
+   ./Build install
+
+Or, if you don't have Module::Build installed, type the following:
 
    perl Makefile.PL
    make
