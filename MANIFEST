@@ -3,7 +3,7 @@ MANIFEST			This list of files
 Makefile.PL
 README
 lib/Params/Callback.pm
-lib/Params/Callback/Exceptions.pm
+lib/Params/CallbackRequest/Exceptions.pm
 lib/Params/CallbackRequest.pm
 t/01basic.t
 t/02priority.t

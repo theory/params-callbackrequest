@@ -2,7 +2,7 @@ package Params::Callback;
 
 use strict;
 use Params::Validate ();
-use Params::Callback::Exceptions (abbr => [qw(throw_bad_params)]);
+use Params::CallbackRequest::Exceptions (abbr => [qw(throw_bad_params)]);
 
 use vars qw($VERSION);
 $VERSION = 1.10;
@@ -371,7 +371,7 @@ sub abort {
 sub aborted {
     my ($self, $err) = @_;
     $err = $@ unless defined $err;
-    return Params::Callback::Exceptions::isa_cb_exception( $err, 'Abort' );
+    return Params::CallbackRequest::Exceptions::isa_cb_exception( $err, 'Abort' );
 }
 
 1;

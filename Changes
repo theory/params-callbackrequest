@@ -9,7 +9,7 @@ Revision history for Perl extension Params::CallbackRequest.
         Params::Callback.
       - MasonX::CallbackTester has been removed, since it isn't necessary
         in a non-mod_perl environment.
-      - Created Params::Callback::Exceptions to create all of the exception
+      - Created Params::CallbackRequest::Exceptions to create all of the exception
         classes used by Params::CallbackRequest. These no longer inherit from
         HTML::Mason::Exception, of course, but from Exception::Class::Base.
       - Renamed the "exec_null_cb_values" parameter to "ignore_nulls". It is

@@ -2,7 +2,7 @@ package Params::CallbackRequest;
 
 use strict;
 use Params::Validate ();
-use Params::Callback::Exceptions (abbr => [qw(throw_bad_params throw_bad_key
+use Params::CallbackRequest::Exceptions (abbr => [qw(throw_bad_params throw_bad_key
                                               throw_cb_exec)]);
 
 use vars qw($VERSION);
@@ -474,7 +474,7 @@ When the parameters hash $params is passed to Params::CallbackRequest's
 C<request()> method, the C<world|save_cb> parameter would trigger the callback
 associated with the "save" callback key in the "world" package. If such a
 callback hasn't been configured, then Params::CallbackRequest will throw a
-Params::Callback::Exceptions::InvalidKey exception. Here's how to configure a
+Params::CallbackRequest::Exceptions::InvalidKey exception. Here's how to configure a
 functional callback when constructing your Params::CallbackRequest object so
 that that doesn't happen:
 

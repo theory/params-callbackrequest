@@ -1,4 +1,4 @@
-package Params::Callback::Exceptions;
+package Params::CallbackRequest::Exceptions;
 
 use strict;
 use vars qw($VERSION);
@@ -74,14 +74,14 @@ __END__
 
 =head1 NAME
 
-Params::Callback::Exceptions - Parameter callback exception definitions
+Params::CallbackRequest::Exceptions - Parameter callback exception definitions
 
 =head1 SYNOPSIS
 
-  use Params::Callback::Exceptions;
+  use Params::CallbackRequest::Exceptions;
   Params::Callback::Exception::Execution->throw("Whoops!");
 
-  use Params::Callback::Exceptions abbr => [qw(throw_cb_exec)];
+  use Params::CallbackRequest::Exceptions abbr => [qw(throw_cb_exec)];
   throw_cb_exec "Whoops!";
 
 =head1 DESCRIPTION
@@ -131,12 +131,12 @@ with the argument used as the exception error message.
 
 =head3 Abbreviated Exception Functions
 
-Each of the exception classes created by Params::Callback::Exceptions has a
+Each of the exception classes created by Params::CallbackRequest::Exceptions has a
 functional alias for its throw class method. These may be imported by passing
 an array reference of the names of the abbreviated functions to import via the
 C<abbr> parameter:
 
-  use Params::Callback::Exceptions abbr => [qw(throw_cb_exec)];
+  use Params::CallbackRequest::Exceptions abbr => [qw(throw_cb_exec)];
 
 The names of the abbreviated functions are:
 

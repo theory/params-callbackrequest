@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 07combined.t,v 1.5 2003/08/18 23:59:41 david Exp $
+# $Id: 07combined.t,v 1.6 2003/08/19 16:06:50 david Exp $
 
 use strict;
 use Test::More;
@@ -28,7 +28,7 @@ package Params::Callback::TestObjects;
 use strict;
 use base 'Params::Callback';
 __PACKAGE__->register_subclass( class_key => $base_key);
-use Params::Callback::Exceptions abbr => [qw(throw_cb_exec)];
+use Params::CallbackRequest::Exceptions abbr => [qw(throw_cb_exec)];
 
 sub simple : Callback {
     my $self = shift;
