@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 07combined.t,v 1.2 2003/08/16 00:48:48 david Exp $
+# $Id: 07combined.t,v 1.3 2003/08/16 02:05:30 david Exp $
 
 use strict;
 use Test::More;
@@ -17,7 +17,7 @@ BEGIN {
       unless eval { require Attribute::Handlers }
       and eval { require Class::ISA };
 
-    plan tests => 16;
+    plan tests => 20;
 }
 
 ##############################################################################
@@ -48,8 +48,23 @@ sub lowerit : PostCallback {
     }
 }
 
+1;
+##############################################################################
+# Set up another callback class to test the default class key.
+package Params::Callback::TestKey;
+use strict;
+use base 'Params::Callback';
+__PACKAGE__->register_subclass;
+
+sub my_key : Callback {
+    my $self = shift;
+    main::is($self->pkg_key, __PACKAGE__, "Check package key" );
+    main::is($self->class_key, __PACKAGE__, "Check class key" );
+}
+
 ##############################################################################
 # Back in the real world...
+##############################################################################
 package main;
 use strict;
 use_ok('Params::CallbackExec');
@@ -78,7 +93,7 @@ ok( my $cb_exec = Params::CallbackExec->new
     ( callbacks => [{ pkg_key => 'foo',
                       cb_key => 'another',
                       cb => \&another}],
-      cb_classes => [$base_key],
+      cb_classes => 'ALL',
       pre_callbacks => [\&presto] ),
     "Construct combined CBExec object" );
 
@@ -100,6 +115,12 @@ is( $params{result}, 'Simple Success', "Check OO result" );
             do_presto => 1);
 ok( $cb_exec->execute(\%params), "Execute request callbacks" );
 is( $params{result}, 'presto', "Check request result" );
+
+##############################################################################
+# Make sure that the default class key is the class name.
+%params = ( "Params::Callback::TestKey|my_key_cb" => 1);
+ok( $cb_exec->execute(\%params), "Execute class key callback" );
+
 
 1;
 __END__
