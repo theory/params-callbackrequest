@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 05object.t,v 1.6 2003/08/19 17:26:36 david Exp $
+# $Id: 05object.t,v 1.7 2003/08/20 05:03:37 david Exp $
 
 use strict;
 use Test::More;
@@ -287,13 +287,14 @@ for my $key ($base_key, $base_key . "Empty", $all) {
     %params = ("$key|test_abort_cb0" => 1,
                "$key|simple_cb" => 1,
                 result => 'still here' );
-    ok( $cb_request->request(\%params), "Execute abort callback" );
+    is( $cb_request->request(\%params), 1, "Execute abort callback" );
     is( $params{result}, 'still here', "Check abort result" );
 
     ##########################################################################
     # Test aborted for a false value.
     %params = ("$key|test_aborted_cb" => 0 );
-    ok( $cb_request->request(\%params), "Execute false aborted callback" );
+    is( $cb_request->request(\%params), $cb_request,
+        "Execute false aborted callback" );
     is( $params{result}, 'no', "Check false aborted result" );
 
     ##########################################################################

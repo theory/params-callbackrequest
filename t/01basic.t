@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 01basic.t,v 1.8 2003/08/19 17:26:36 david Exp $
+# $Id: 01basic.t,v 1.9 2003/08/20 05:03:37 david Exp $
 
 use strict;
 use Test::More tests => 57;
@@ -236,13 +236,13 @@ is( $params{result}, 2, "Check image button priority result" );
 # cause it to prevent simple from being called.
 %params = ( "$key|simple_cb" => 1,
             "$key|test_abort_cb0" => 1 );
-ok( $cb_request->request(\%params), "Execute abort callback" );
+is( $cb_request->request(\%params), 1, "Execute abort callback" );
 is( $params{result}, 'aborted', "Check abort result" );
 
 ##############################################################################
 # Test the aborted method.
 %params = ( "$key|test_aborted_cb" => 1 );
-ok( $cb_request->request(\%params), "Execute aborted callback" );
+is( $cb_request->request(\%params), $cb_request, "Execute aborted callback" );
 is( $params{result}, 'yes', "Check aborted result" );
 
 ##############################################################################

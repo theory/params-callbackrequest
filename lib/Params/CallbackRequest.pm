@@ -293,17 +293,19 @@ sub request {
     };
 
     # Clear out the redirected attribute and the status.
-    delete $self->{redirected};
-    my $ret = exists $self->{_status} ? delete $self->{_status} : $self;
+    my $redir = delete $self->{redirected};
+    my $status = delete $self->{_status};
 
     if (my $err = $@) {
         # Just pass exception objects to the exception handler unless it's
         # an abort.
         rethrow_exception($err) unless isa_cb_exception($err, 'Abort');
+        # There's a status to return.
+        return $status;
     }
 
-    # Return the status or $self.
-    return $ret;
+    # We now return to normal processing.
+    return $redir ? $status : $self;
 }
 
 1;
