@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 04errors.t,v 1.1 2003/08/14 02:05:47 david Exp $
+# $Id: 04errors.t,v 1.2 2003/08/15 23:20:21 david Exp $
 
 use strict;
 use Test::More tests => 50;
@@ -157,11 +157,11 @@ ok( $err = $@, "Catch our exception" );
 isa_ok($err, 'TestException' );
 
 ##############################################################################
-# Now test cb_exception_handler.
+# Now test exception_handler.
 %params = ( "$key|mydie_cb" => 1 );
 ok( $cb_exec = Params::CallbackExec->new
     ( callbacks            => [\%cbs],
-      cb_exception_handler => sub {
+      exception_handler => sub {
           like( $_[0], qr/^Ouch! at/, "Custom check our die message" );
       }), "Construct CBExec object with custom exception handler" );
 eval { $cb_exec->execute(\%params) };

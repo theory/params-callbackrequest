@@ -81,7 +81,7 @@ my %valid_params =
       default   => 0,
     },
 
-    cb_exception_handler =>
+    exception_handler =>
     { type      => Params::Validate::CODEREF,
       default   => $exception_handler
     },
@@ -273,7 +273,7 @@ sub execute {
 
     # Now execute the callbacks.
     eval {
-        local $SIG{__DIE__} = $self->{cb_exception_handler};
+        local $SIG{__DIE__} = $self->{exception_handler};
         foreach my $cb_list (@cbs) {
             # Skip it if there are no callbacks for this priority.
             next unless $cb_list;
