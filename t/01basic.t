@@ -1,9 +1,9 @@
 #!perl -w
 
-# $Id: 01basic.t,v 1.10 2003/08/25 03:26:01 david Exp $
+# $Id: 01basic.t,v 1.11 2003/09/07 18:05:00 david Exp $
 
 use strict;
-use Test::More tests => 60;
+use Test::More tests => 73;
 
 BEGIN { use_ok('Params::CallbackRequest') }
 
@@ -141,6 +141,49 @@ push @$cbs, { pkg_key => $key,
             };
 
 ##############################################################################
+# We'll use these callbacks to test notes().
+sub add_note {
+    my $cb = shift;
+    $cb->notes($cb->value, $cb->params->{note});
+}
+
+sub get_note {
+    my $cb = shift;
+    $cb->params->{result} = $cb->notes($cb->value);
+}
+
+sub list_notes {
+    my $cb = shift;
+    my $params = $cb->params;
+    my $notes = $cb->notes;
+    for my $k (sort keys %$notes) {
+        $params->{result} .= "$k => $notes->{$k}\n";
+    }
+}
+
+sub clear {
+    my $cb = shift;
+    $cb->cb_request->clear_notes;
+}
+
+push @$cbs, { pkg_key => $key,
+              cb_key  => 'add_note',
+              cb      => \&add_note
+            },
+            { pkg_key => $key,
+              cb_key  => 'get_note',
+              cb      => \&get_note
+            },
+            { pkg_key => $key,
+              cb_key  => 'list_notes',
+              cb      => \&list_notes
+            },
+            { pkg_key => $key,
+              cb_key  => 'clear',
+              cb      => \&clear
+            };
+
+##############################################################################
 # We'll use this callback to change the result to uppercase.
 sub upper {
     my $cb = shift;
@@ -246,11 +289,59 @@ is( $cb_request->request(\%params), $cb_request, "Execute aborted callback" );
 is( $params{result}, 'yes', "Check aborted result" );
 
 ##############################################################################
+# Test notes.
+my $note_key = 'myNote';
+my $note = 'Test note';
+%params = ("$key|add_note_cb1" => $note_key, # Executes first.
+           note                => $note,
+           "$key|get_note_cb"  => $note_key);
+is( $cb_request->request(\%params), $cb_request, "Add and get note" );
+is( $params{result}, $note, "Check note result" );
+
+# Make sure the note isn't available on the next request.
+%params = ( "$key|get_note_cb"  => $note_key );
+is( $cb_request->request(\%params), $cb_request, "Get no note" );
+is( $params{result}, undef, "Check no note result" );
+
+# Tell the callback request object to leave the notes and try again.
+ok( $cb_request = Params::CallbackRequest->new
+    ( callbacks      => $cbs,
+      leave_notes    => 1,
+      post_callbacks => [\&upper],
+      pre_callbacks  => [\&flip] ),
+    "Construct a new CBExec object" );
+
+%params = ("$key|add_note_cb1" => $note_key, # Executes first.
+           note                => $note,
+           "$key|get_note_cb"  => $note_key);
+is( $cb_request->request(\%params), $cb_request, "Add and get note again" );
+is( $params{result}, $note, "Check note result" );
+
+# Make sure the note isn't available on the next request.
+%params = ( "$key|get_note_cb"  => $note_key );
+is( $cb_request->request(\%params), $cb_request, "Get persistent note" );
+is( $params{result}, $note, "Check presistent note result" );
+
+# Add another note.
+%params = ("$key|add_note_cb1"  => $note_key . 1, # Executes first.
+           note                 => $note . 1,
+           "$key|list_notes_cb" => 1);
+is( $cb_request->request(\%params), $cb_request, "Add another note" );
+is( $params{result}, "$note_key => $note\n${note_key}1 => ${note}1\n",
+    "Check multiple note result" );
+
+# And finally, clear the notes out.
+%params = ( "$key|clear_cb1" => 1, # Executes first.
+           "$key|list_notes_cb" => 1);
+is( $cb_request->request(\%params), $cb_request, "Clear notes" );
+is( $params{result}, undef, "Check cleared note result" );
+
+##############################################################################
 # Test the pre-execution callbacks.
 my $string = 'yowza';
 %params = ( "$key|submit_cb" => 1,
             submit           => $string,
-            do_flip         => 1 );
+            do_flip          => 1 );
 ok( $cb_request->request(\%params), "Execute pre callback" );
 is( $params{result}, reverse($string), "Check pre result" );
 
@@ -285,6 +376,7 @@ is( $params{result}, undef, "Check undef simple result" );
 %params = ( "$key|simple_cb" => 0);
 ok( $new_cb_request->request(\%params), "Execute 0 simple callback" );
 is( $params{result}, 'Success', "Check 0 simple result" );
+
 
 
 1;

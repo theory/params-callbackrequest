@@ -372,6 +372,12 @@ sub aborted {
     return Params::CallbackRequest::Exceptions::isa_cb_exception( $err, 'Abort' );
 }
 
+##############################################################################
+
+sub notes {
+    shift->{cb_request}->notes(@_);
+}
+
 1;
 __END__
 
@@ -573,6 +579,17 @@ C<< $cb->redirected >> to make sure it hasn't been done already.
 =head2 Other Methods
 
 Params::Callback offers has a few other publicly accessible methods.
+
+=head3 notes
+
+  $cb->notes($key => $value);
+  my $val = $cb->notes($key);
+  my $notes = $cb->notes;
+
+Shortcut for C<< $cb->cb_request->notes >>. It provides a place to store
+application data, giving developers a way to share data among multiple
+callbacks. See L<C<notes()>|Params::CallbackRequest/"notes"> for more
+information.
 
 =head3 redirect
 

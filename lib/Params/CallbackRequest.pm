@@ -88,6 +88,10 @@ my %valid_params =
       default   => $exception_handler
     },
 
+    leave_notes =>
+    { type      => Params::Validate::BOOLEAN,
+      default   => 0,
+    },
   );
 
 BEGIN {
@@ -164,6 +168,9 @@ sub new {
         require Carp;
         Carp::carp("You didn't specify any callbacks.");
     }
+
+    # Set up the notes hash.
+    $p{notes} = {};
 
     # Let 'em have it.
     return bless \%p, ref $proto || $proto;
@@ -290,9 +297,10 @@ sub request {
         }
     };
 
-    # Clear out the redirected attribute and the status.
+    # Clear out the redirected attribute, the status, and notes.
     my $redir = delete $self->{redirected};
     my $status = delete $self->{_status};
+    %{$self->{notes}} = () unless $self->{leave_notes};
 
     if (my $err = $@) {
         # Just pass the exception to the exception handler unless it's an
@@ -303,6 +311,19 @@ sub request {
 
     # We now return to normal processing.
     return $redir ? $status : $self;
+}
+
+sub notes {
+    my $self = shift;
+    return $self->{notes} unless @_;
+    my $key = shift;
+    return @_
+      ? $self->{notes}{$key} = shift
+      : $self->{notes}{$key};
+}
+
+sub clear_notes {
+    %{shift->{notes}} = ();
 }
 
 1;
@@ -863,6 +884,17 @@ the execution of all parameter-triggered callbacks when the callback parameter
 value is undefined or the null string (''), pass the C<ignore_null> parameter
 with a true value. It is set to a false value by default.
 
+=item C<leave_notes>
+
+By default, Params::CallbackRequest will clear out the contents of the hash
+accessed via the C<notes()> method just before returning from a call to
+C<request()>. There may be some circumstances when it's desirable to allow the
+notes hash to persist beyond the duration of a a call to C<request()>. For
+example, a templating architecture may wish to keep the notes around for the
+duration of the execution of a template request. In such cases, pass a true
+value to the C<leave_notes> parameter, and use the C<clear_notes()> method to
+manually clear out the notes hash at the appropriate point.
+
 =item C<exception_handler>
 
 Params::CallbackRequest installs a custom exception handler during the
@@ -882,7 +914,7 @@ code reference to do what you need.
 Params::CallbackRequest of course has several instance methods. I cover the most
 important, first.
 
-=head3 C<request()>
+=head3 request
 
   $cb_request->request(\%params);
 
@@ -921,7 +953,47 @@ by the caller or the whole process will terminate:
       # Handle exception.
   }
 
-=head3 Accessor Methods
+=head3 notes
+
+  $cb_request->notes($key => $value);
+  my $val = $cb_request->notes($key);
+  my $notes = $cb_request->notes;
+
+The C<notes()> method provides a place to store application data, giving
+developers a way to share data among multiple callbacks over the course of a
+call to C<request()>. Any data stored here persists for the duration of the
+request unless the C<leave_notes> parameter to C<new()> has been passed a true
+value. In such cases, use C<clear_notes()> to manually clear the notes.
+
+Conceptually, C<notes()> contains a hash of key-value pairs. C<notes($key,
+$value)> stores a new entry in this hash. C<notes($key)> returns a previously
+stored value. C<notes()> without any arguments returns a reference to the
+entire hash of key-value pairs.
+
+C<notes()> is similar to the mod_perl method C<< $r->pnotes() >>. The main
+differences are that this C<notes()> can be used in a non-mod_perl
+environment, and that its lifetime is tied to the lifetime of the call to
+C<request()> unless the C<leave_notes> parameter is true.
+
+For the sake of convenience, a shortcut to C<notes()> is provide to callback
+code via the L<C<notes()>|Params::Callback/"notes"> method in
+Params::Callback.
+
+=head3 clear_notes
+
+  $cb_request->clear_notes;
+
+Use this method to clear out the notes hash. Most useful when the
+C<leave_notes> parameter to C<new()> has been set to at true value and you
+need to manage the clearing of notes yourself. This method is specifically
+designed for a templating environment, where it may be advantageous for the
+templating architecture to allow the notes to persist beyond the duration of a
+call to C<request()>, e.g., to keep them for the duration of a call to the
+templating architecture itself. See
+L<MasonX::Interp::WithCallbacks|MasonX::Interp::WithCallbacks> for an example
+of this strategy.
+
+=head2 Accessor Methods
 
 The properties C<default_priority> and C<default_pkg_key> have standard
 read-only accessor methods of the same name. For example:

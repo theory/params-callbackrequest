@@ -27,3 +27,7 @@ Revision history for Perl extension Params::CallbackRequest.
       - Replaced the "exec_null_cb_values" parameter from
         MasonX::ApacheHandler::WithCallbaks, which had defaulted to true, with
         "ignore_nulls" in Params::CallbackRequest, which defaults to false.
+      - Added notes() to manage per-request notes. Pass a true value to the
+        "leave_notes" parameter to new() to allow notes to persist beyond
+        calls to request(). In such casses, use clear_notes() to manually clear
+        the notes.
