@@ -1,16 +1,20 @@
-Params/CallbackExec version 0.01
+Params/CallbackExec version 1.10
 ================================
 
-The README is used to introduce the module and provide instructions on
-how to install the module, any machine dependencies it may have (for
-example C compilers and installed libraries) and any other information
-that should be provided before the module is installed.
+Params::CallbackExec provides functional and object-oriented callbacks to
+method and function parameters. Callbacks may be either code references
+provided to the new() constructor, or methods defined in subclasses of
+Params::Callback. Callbacks are triggered either for every call to the
+Params::CallbackExec C<execute()> method, or by specially named keys in the
+parameters to execute().
 
-A README file is required for CPAN modules since CPAN extracts the
-README file from a module distribution so that people browsing the
-archive can use it get an idea of the modules uses. It is usually a
-good idea to provide version information here so that people can
-decide whether fixes for the module are worth downloading.
+The idea behind this module is to provide a sort of plugin architecture for
+Perl templating systems. Callbacks are executed by the contents of a request
+to the Perl templating server, before the templating system itself executes.
+This approach allows you to carry out logical processing of data submitted
+from a form, to affect the contents of the request parameters before they're
+passed to the templating system for processing, and even to redirect or abort
+the request before the templating system handles it.
 
 INSTALLATION
 
@@ -25,14 +29,22 @@ DEPENDENCIES
 
 This module requires these other modules and libraries:
 
-  blah blah blah
+  Params::Validate 0.59 or later
+  Exception::Class 1.10 or later
+
+The object-oriented callback interface requires Perl 5.6 or later and
+these other modules and libraries:
+
+  Attribute::Handlers 0.77 or later
+  Clas::ISA
+
+The test suite requires:
+
+  Test::Simple 0.17 or later
 
 COPYRIGHT AND LICENCE
-
-Put the correct copyright and licence information here.
 
 Copyright (C) 2003 David Wheeler
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 
-
