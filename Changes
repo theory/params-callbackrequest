@@ -18,9 +18,12 @@ Revision history for Perl extension Params::CallbackRequest.
         the same.
       - Renamed the "cb_exception_handler" to "exception_handler", since it's
         now obvious that it applies to callbacks.
-      - Changed the C<request_args()> accessor from that was in
-        MasonX::CallbackHandler to C<params()> in Params::Callback, to reflect
+      - Changed the request_args() accessor from that was in
+        MasonX::CallbackHandler to params() in Params::Callback, to reflect
         the idea that this is a generic parameter-triggered callback
         architecture.
-      - Replaced the C<ah()> accessor, since the callback controller isn't
-        a Mason ApacheHandler anymore, with C<cb_request()> in Params::Callback.
+      - Replaced the ah() accessor, since the callback controller isn't a
+        Mason ApacheHandler anymore, with cb_request() in Params::Callback.
+      - Replaced the "exec_null_cb_values" parameter from
+        MasonX::ApacheHandler::WithCallbaks, which had defaulted to true, with
+        "ignore_nulls" in Params::CallbackRequest, which defaults to false.
