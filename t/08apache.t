@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 08apache.t,v 1.1 2003/08/19 17:37:26 david Exp $
+# $Id: 08apache.t,v 1.2 2003/08/19 17:39:08 david Exp $
 
 use strict;
 use Test::More;
@@ -70,8 +70,8 @@ is( $cb_request->request(\%params, apache_req => $apache_req), 302,
 
 # Check apache request values (too bad Apache::FakeRequest can't handle
 # parameter lists. This should be good enough, though.
-is( $apache_req->{err_header_out}, 'Location', "Check err_header_out" );
-is( $apache_req->{method}, 'GET', "Check request method" );
+is( delete $apache_req->{err_header_out}, 'Location', "Check err_header_out" );
+is( delete $apache_req->{method}, 'GET', "Check request method" );
 
 ##############################################################################
 # Now execute an instant redirection (that is, with abort).
@@ -80,8 +80,8 @@ is( $cb_request->request(\%params, apache_req => $apache_req), 302,
     "Execute instant redir callback" );
 
 # Check the Apache settings again.
-is( $apache_req->{err_header_out}, 'Location', "Check err_header_out" );
-is( $apache_req->{method}, 'GET', "Check request method" );
+is( delete $apache_req->{err_header_out}, 'Location', "Check err_header_out" );
+is( delete $apache_req->{method}, 'GET', "Check request method" );
 
 ##############################################################################
 # Now make sure that if there is no redirection that redirectd returns false,
