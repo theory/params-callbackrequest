@@ -29,10 +29,8 @@ BEGIN {
     # that we can tell ApacheHandler::WithCallbacks that they exist and
     # are loaded.
     unless ($] < 5.006) {
-        eval {
-            require Attribute::Handlers;
-            require Class::ISA;
-        }
+        require Attribute::Handlers;
+        require Class::ISA;
     }
 
     # Build read-only accessors.

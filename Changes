@@ -1,5 +1,10 @@
 Revision history for Perl extension Params::CallbackRequest.
 
+1.14
+      - Removed an unnecessary eval block around the loading of Class::ISA
+        and Attribute::Handlers that would prevent the failure of either of
+        those modules to load to propagate
+
 1.13  2004-04-20T18:29:37
       - Apache 2 compatability added thanks to Fred Moyer.
 
