@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 06object_request.t,v 1.1 2003/08/16 00:48:48 david Exp $
+# $Id: 06object_request.t,v 1.2 2003/08/18 23:56:09 david Exp $
 
 use strict;
 use Test::More;
@@ -146,32 +146,32 @@ sub sub_post : PostCallback {
 
 package main;
 use strict;
-use_ok( 'Params::CallbackExec' );
+use_ok( 'Params::CallbackRequest' );
 
 
 ##############################################################################
 # Make sure that the base pre and post callbacks work properly. Start with
 # post.
-ok( my $cb_exec = Params::CallbackExec->new(cb_classes => [$base_key]),
+ok( my $cb_request = Params::CallbackRequest->new(cb_classes => [$base_key]),
     "Construct base callback CBExec" );
 
 ##############################################################################
 # Start with post.
 my %params = (do_lower => 1,
               result => 'LOWER ME, BABY!');
-ok( $cb_exec->execute(\%params), "Execute post callback" );
+ok( $cb_request->request(\%params), "Execute post callback" );
 is( $params{result}, 'lower me, baby!', "Check post callback result" );
 
 ##############################################################################
 # Now check pre.
 %params = (do_upper => 1,
            result   => 'taKe mE uP!');
-ok( $cb_exec->execute(\%params), "Execute pre callback" );
+ok( $cb_request->request(\%params), "Execute pre callback" );
 is( $params{result}, 'TAKE ME UP!', "Check pre callback result" );
 
 ##############################################################################
 # Make sure that pre and post execution callback inheritance works properly.
-ok( $cb_exec = Params::CallbackExec->new
+ok( $cb_request = Params::CallbackRequest->new
     (cb_classes => [$base_key . 'Sub']),
     "Construct subclasseed callback CBExec" );
 
@@ -179,7 +179,7 @@ ok( $cb_exec = Params::CallbackExec->new
 # Post first.
 %params = (do_lower => 1,
            result   => 'LOWER ME');
-ok( $cb_exec->execute(\%params), "Test subclassed post callback" );
+ok( $cb_request->request(\%params), "Test subclassed post callback" );
 is( $params{result}, 'lower me precallback Overridden PostCallback',
     "Check subclassed post callback result" );
 
@@ -187,7 +187,7 @@ is( $params{result}, 'lower me precallback Overridden PostCallback',
 # Now check pre.
 %params = (do_upper => 1,
            result   => 'taKe mE uP aGain!');
-ok( $cb_exec->execute(\%params), "Execute subclassed pre callback" );
+ok( $cb_request->request(\%params), "Execute subclassed pre callback" );
 is( $params{result}, 'TAKE ME UP AGAIN! PRECALLBACK Overridden PostCallback',
     "Check subclassed pre callback result" );
 
@@ -195,7 +195,7 @@ is( $params{result}, 'TAKE ME UP AGAIN! PRECALLBACK Overridden PostCallback',
 # Check that no of the unneeded attributes are populated during request
 # callbacks.
 %params = ("$base_key|pre_post_cb" => 1);
-ok( $cb_exec->execute(\%params), "Execute attribute check callback" );
+ok( $cb_request->request(\%params), "Execute attribute check callback" );
 is( $params{result}, 'Attributes okay', "Check attribute check result" );
 
 1;

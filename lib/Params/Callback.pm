@@ -28,7 +28,7 @@ BEGIN {
         }
     }
 
-    for my $attr (qw( cb_exec
+    for my $attr (qw( cb_request
                       params
                       apache_req
                       priority
@@ -43,8 +43,8 @@ BEGIN {
 }
 
 my %valid_params =
-  ( cb_exec      =>
-    { isa        => 'Params::CallbackExec',
+  ( cb_request      =>
+    { isa        => 'Params::CallbackRequest',
     },
 
     params =>
@@ -184,7 +184,7 @@ sub PostCallback : ATTR(CODE, BEGIN) {
 }
 
 ##############################################################################
-# This method is called by Params::CallbackExec to find the
+# This method is called by Params::CallbackRequest to find the
 # names of all the callback methods declared with the PreCallback and
 # PostCallback attributes (might handle those declared with the Callback
 # attribute at some point, as well -- there's some of it in CVS Revision
@@ -192,7 +192,7 @@ sub PostCallback : ATTR(CODE, BEGIN) {
 # when the attribute callback is called. I would use a CHECK or INIT block,
 # but mod_perl ignores them. So the solution is to have the callback methods
 # save the code references for the methods, make sure that
-# Params::CallbackExec is loaded _after_ all the classes that
+# Params::CallbackRequest is loaded _after_ all the classes that
 # inherit from Params::Callback, and have it call this method to go
 # back and find the names of the callback methods. The method names will then
 # of course be used for the callback names. In mod_perl2, we'll likely be able
@@ -213,7 +213,7 @@ sub _find_names {
                     # Grab the symbol hash for this code reference.
                     my $sym = Attribute::Handlers::findsym($class, $code)
                       or die "Anonymous subroutines not supported. Make " .
-                        "sure that Params::CallbackExec loads last";
+                        "sure that Params::CallbackRequest loads last";
                     # ApacheHandler::WithCallbacks wants this array reference.
                     $type->{$class}{*{$sym}{NAME}} = [ sub { goto $code },
                                                        $class ];
@@ -267,9 +267,9 @@ sub _copy_meths {
 }
 
 ##############################################################################
-# This method is called by Params::CallbackExec to find
+# This method is called by Params::CallbackRequest to find
 # methods for callback classes. This is because Params::Callback stores
-# this list of callback classes, not Params::CallbackExec.
+# this list of callback classes, not Params::CallbackRequest.
 # Its arguments are the callback class, the name of the method (callback),
 # and a reference to the priority. We'll only assign the priority if it
 # hasn't been assigned one already -- that is, it hasn't been _called_ with
@@ -292,7 +292,7 @@ sub _get_callback {
 }
 
 ##############################################################################
-# This method is also called by Params::CallbackExec, where
+# This method is also called by Params::CallbackRequest, where
 # the cb_classes parameter passes in a list of callback class keys or the
 # string "ALL" to indicate that all of the callback classes should have their
 # callbacks loaded for use by the ApacheHandler.
@@ -334,22 +334,22 @@ sub redirect {
         $r->headers_in->unset('Content-length');
         $r->err_header_out( Location => $url );
     }
-    my $cb_exec = $self->cb_exec;
-    $cb_exec->{_status} = $status;
-    $cb_exec->{redirected} = $url;
+    my $cb_request = $self->cb_request;
+    $cb_request->{_status} = $status;
+    $cb_request->{redirected} = $url;
     $self->abort($status) unless $wait;
 }
 
 ##############################################################################
 
-sub redirected { $_[0]->cb_exec->redirected }
+sub redirected { $_[0]->cb_request->redirected }
 
 ##############################################################################
 
 sub abort {
     my ($self, $aborted_value) = @_;
     # Should I use an accessor here?
-    $self->cb_exec->{_status} = $aborted_value;
+    $self->cb_request->{_status} = $aborted_value;
     Params::Callback::Exception::Abort->throw
         ( error => ref $self . '->abort was called',
           aborted_value => $aborted_value );
@@ -398,16 +398,16 @@ Object-oriented callback interface:
 =head1 DESCRIPTION
 
 Params::Callback provides the interface for callbacks to access parameter
-hashes Params::CallbackExec object, and callback metadata, as well as for
+hashes Params::CallbackRequest object, and callback metadata, as well as for
 executing common request actions, such as aborting a callback execution
 request. There are two ways to use Params::Callback: via functional-style
 callback subroutines and via object-oriented callback methods.
 
 For functional callbacks, a Params::Callback object is constructed by
-Params::CallbackExec for each call to its C<execute()> method, and passed in
+Params::CallbackRequest for each call to its C<request()> method, and passed in
 as the sole argument for every execution of a callback function. See
-L<Params::CallbackExec|Params::CallbackExec> for details on how to create a
-Params::CallbackExec object to execute your callback code.
+L<Params::CallbackRequest|Params::CallbackRequest> for details on how to create a
+Params::CallbackRequest object to execute your callback code.
 
 In the object-oriented callback interface, Params::Callback is the parent
 class from which all callback classes inherit. Callback methods are declared
@@ -421,7 +421,7 @@ in the L<subclassing|"SUBCLASSING"> section.
 
 Params::Callback provides the parameter hash accessors and utility methods that
 will help manage a callback request (where a "callback request" is considered
-a single call to the C<execute()> method on a Params::CallbackExec object).
+a single call to the C<request()> method on a Params::CallbackRequest object).
 Functional callbacks always get a Params::Callback object passed as their
 first argument; the same Params::Callback object will be used for all
 callbacks in a single request. For object-oriented callback methods, the first
@@ -437,11 +437,11 @@ All of the Params::Callback accessor methods are read-only. Feel free to add
 other attributes in your Params::Callback subclasses if you're using the
 object-oriented callback interface.
 
-=head3 cb_exec
+=head3 cb_request
 
-  my $cb_exec = $cb->cb_exec;
+  my $cb_request = $cb->cb_request;
 
-Returns a reference to the Params::CallbackExec object that
+Returns a reference to the Params::CallbackRequest object that
 executed the callback.
 
 =head3 params
@@ -471,7 +471,7 @@ arguments, then it will be the plain old L<Apache|Apache> object.
 Returns the priority level at which the callback was executed. Possible values
 are between "0" and "9", and may be set by a default priority setting, by the
 callback configuration or method declaration, or by the parameter callback
-trigger key. See L<Params::CallbackExec|Params::CallbackExec> for details.
+trigger key. See L<Params::CallbackRequest|Params::CallbackRequest> for details.
 
 =head3 cb_key
 
@@ -515,7 +515,7 @@ Then the value returned by C<trigger_key()> method will be "MyCBs|save_cb6".
 
 B<Note:> Most browsers will submit "image" input fields with two arguments,
 one with ".x" appended to its name, and the other with ".y" appended to its
-name. Because Params::CallbackExec is designed to be used with Web form fields
+name. Because Params::CallbackRequest is designed to be used with Web form fields
 populating a parameter hash, it will ignore these fields and either use the
 field that's named without the ".x" or ".y", or create a field with that name
 and give it a value of "1". The reasoning behind this approach is that the
@@ -583,7 +583,7 @@ default, the status code used is "302", but this can be overridden via the
 C<$status> argument. If the optional C<$wait> argument is true, any callbacks
 scheduled to be executed after the call to C<redirect> will continue to be
 executed. In that case, C<< $cb->abort >> will not be called; rather,
-Params::CallbackExec will finish executing all remaining
+Params::CallbackRequest will finish executing all remaining
 callbacks and then check the status and abort before Mason creates and
 executes a component stack. If the C<$wait> argument is unspecified or false,
 then the request will be immediately terminated without executing subsequent
@@ -674,17 +674,17 @@ method to call (plus '_cb'). If multiple parameter use the "MyHandler" class
 key in a single request, then a single MyApp::CallbackHandler object instance
 will be used to execute each of those callback methods for that request.
 
-To configure your Params::CallbackExec object to use this callback, use its
+To configure your Params::CallbackRequest object to use this callback, use its
 C<cb_classes> constructor parameter:
 
-  my $cb_exec = Params::CallbackExec->new( cb_classes => [qw(MyHandler)] );
-  $cb_exec->execute($params);
+  my $cb_request = Params::CallbackRequest->new( cb_classes => [qw(MyHandler)] );
+  $cb_request->request($params);
 
 Now, there are a few of things to note in the above callback class example.
 The first is the call to C<< __PACKAGE__->register_subclass >>. This step is
 B<required> in all callback subclasses in order that Params::Callback will
 know about them, and thus they can be loaded into an instance of a
-Params::CallbackExec object via its C<cb_classes> constructor parameter.
+Params::CallbackRequest object via its C<cb_classes> constructor parameter.
 
 Second, a callback class key B<must> be declared for the class. This can be
 done either by implementing the C<CLASS_KEY()> class method or constant in
@@ -692,7 +692,7 @@ your subclass, or by passing the C<class_key> parameter to
 C<< __PACKAGE__->register_subclass >>, which will then create the
 C<CLASS_KEY()> method for you. If no callback key is declared, then
 Params::Callback will throw an exception when you try to load your subclass'
-callback methods into a Params::CallbackExec object.
+callback methods into a Params::CallbackRequest object.
 
 One other, optional parameter, C<default_priority>, may also be passed to
 C<register_subclass()>. The value of this parameter (an integer between 0 and
@@ -708,7 +708,7 @@ declaration in the example above. This attribute is what identifies
 C<build_utc_date> as a parameter-triggered callback. Without the C<Callback>
 attribute, any subroutine declaration in your subclass will just be a
 subroutine or a method; it won't be a callback, and it will never be executed
-by Params::CallbackExec. One parameter, C<priority>, can be passed via the
+by Params::CallbackRequest. One parameter, C<priority>, can be passed via the
 C<Callback> attribute. In the above example, we pass C<< priority => 2 >>,
 which sets the priority for the callback. Without the C<priority> parameter,
 the callback's priority will be set to the value returned by the
@@ -792,10 +792,10 @@ using the Perl C<\x{..}> notation. Again, just subclass:
       encode_unicode($params); # Hand waving.
   }
 
-Now you can just tell Params::CallbackExec to use your subclassed callback
+Now you can just tell Params::CallbackRequest to use your subclassed callback
 handler:
 
-  my $cb_exec = Params::CallbackExec->new( cb_classes => [qw(PerlEncode)] );
+  my $cb_request = Params::CallbackRequest->new( cb_classes => [qw(PerlEncode)] );
 
 Yeah, okay, you could just create a second pre-callback request callback to
 encode the Unicode characters using the Perl C<\x{..}> notation. But you get
@@ -860,7 +860,7 @@ examples. Here is a reference to the complete callback subclassing API.
 Callback classes always subclass Params::Callback, so of course they must
 always declare such. In addition, callback classes must always call
 C<< __PACKAGE__->register_subclass >> so that Params::Callback is aware of
-them and can tell Params::CallbackExec about them.
+them and can tell Params::CallbackRequest about them.
 
 Second, callback classes B<must> have a class key. The class key can be
 created either by implementing a C<CLASS_KEY()> class method or constant that
@@ -925,7 +925,7 @@ will simply inherit the priority returned by
 C<< Params::Callback->DEFAULT_PRIORITY >>, which is "5".
 
 B<Note:> In a mod_perl environment, it's important that you C<use> any and all
-Params::Callback subclasses I<before> you C<use Params::CallbackExec>. This is
+Params::Callback subclasses I<before> you C<use Params::CallbackRequest>. This is
 to get around an issue with identifying the names of the callback methods in
 mod_perl. Read the comments in the source code if you're interested in
 learning more.
@@ -993,7 +993,7 @@ priority?
 
 =head1 SEE ALSO
 
-L<Params::CallbackExec|Params::CallbackExec> constructs Params::Callback
+L<Params::CallbackRequest|Params::CallbackRequest> constructs Params::Callback
 objects and executes the appropriate callback functions and/or methods. It's
 worth a read.
 

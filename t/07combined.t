@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 07combined.t,v 1.3 2003/08/16 02:05:30 david Exp $
+# $Id: 07combined.t,v 1.4 2003/08/18 23:56:09 david Exp $
 
 use strict;
 use Test::More;
@@ -28,7 +28,7 @@ package Params::Callback::TestObjects;
 use strict;
 use base 'Params::Callback';
 __PACKAGE__->register_subclass( class_key => $base_key);
-use Params::Callback::Exceptions abbr => [qw(throw_cb_exec)];
+use Params::Callback::Exceptions abbr => [qw(throw_cb_request)];
 
 sub simple : Callback {
     my $self = shift;
@@ -67,7 +67,7 @@ sub my_key : Callback {
 ##############################################################################
 package main;
 use strict;
-use_ok('Params::CallbackExec');
+use_ok('Params::CallbackRequest');
 
 ##############################################################################
 # Set up a functional callback we can use.
@@ -89,7 +89,7 @@ sub presto {
 
 ##############################################################################
 # Construct the combined callback exec object.
-ok( my $cb_exec = Params::CallbackExec->new
+ok( my $cb_request = Params::CallbackRequest->new
     ( callbacks => [{ pkg_key => 'foo',
                       cb_key => 'another',
                       cb => \&another}],
@@ -100,26 +100,26 @@ ok( my $cb_exec = Params::CallbackExec->new
 ##############################################################################
 # Make sure the functional callback works.
 my %params = ( 'foo|another_cb' => 1);
-ok( $cb_exec->execute(\%params), "Execute functional callback" );
+ok( $cb_request->request(\%params), "Execute functional callback" );
 is( $params{result}, 'Another Success', "Check functional result" );
 
 ##############################################################################
 # Make sure OO callback works.
 %params = ( "$base_key|simple_cb" => 1);
-ok( $cb_exec->execute(\%params), "Execute OO callback" );
+ok( $cb_request->request(\%params), "Execute OO callback" );
 is( $params{result}, 'Simple Success', "Check OO result" );
 
 ##############################################################################
 # Make sure that functional and OO request callbacks execute, too.
 %params = ( do_lower => 1,
             do_presto => 1);
-ok( $cb_exec->execute(\%params), "Execute request callbacks" );
+ok( $cb_request->request(\%params), "Execute request callbacks" );
 is( $params{result}, 'presto', "Check request result" );
 
 ##############################################################################
 # Make sure that the default class key is the class name.
 %params = ( "Params::Callback::TestKey|my_key_cb" => 1);
-ok( $cb_exec->execute(\%params), "Execute class key callback" );
+ok( $cb_request->request(\%params), "Execute class key callback" );
 
 
 1;

@@ -17,7 +17,7 @@ use Exception::Class ( 'Params::Callback::Exception' =>
                        'Params::Callback::Exception::Execution' =>
 		       { isa         => 'Params::Callback::Exception',
                          description => 'Error thrown by callback',
-                         alias       => 'throw_cb_exec',
+                         alias       => 'throw_cb_request',
 			 fields      => [ qw(callback_key callback_error) ] },
 
                        'Params::Callback::Exception::Params' =>
@@ -81,12 +81,12 @@ Params::Callback::Exceptions - Parameter callback exception definitions
   use Params::Callback::Exceptions;
   Params::Callback::Exception::Execution->throw("Whoops!");
 
-  use Params::Callback::Exceptions abbr => [qw(throw_cb_exec)];
-  throw_cb_exec "Whoops!";
+  use Params::Callback::Exceptions abbr => [qw(throw_cb_request)];
+  throw_cb_request "Whoops!";
 
 =head1 DESCRIPTION
 
-This module creates the exceptions used by Params::CallbackExec and
+This module creates the exceptions used by Params::CallbackRequest and
 Params::Callback. The exceptions are subclasses of Exception::Class::Base,
 created by the interface defined by Exception::Class.
 
@@ -136,7 +136,7 @@ functional alias for its throw class method. These may be imported by passing
 an array reference of the names of the abbreviated functions to import via the
 C<abbr> parameter:
 
-  use Params::Callback::Exceptions abbr => [qw(throw_cb_exec)];
+  use Params::Callback::Exceptions abbr => [qw(throw_cb_request)];
 
 The names of the abbreviated functions are:
 
@@ -150,7 +150,7 @@ Params::Callback::Exception
 
 Params::Callback::Exception::InvalidKey
 
-=item throw_cb_exec
+=item throw_cb_request
 
 Params::Callback::Exception::Execution
 
@@ -175,7 +175,7 @@ functional alias is C<throw_cb>.
 
 =head3 Params::Callback::Exception::InvalidKey
 
-Params::CallbackExec throws this exception when a callback key in the parameter
+Params::CallbackRequest throws this exception when a callback key in the parameter
 hash passed to C<new()> has no corresponding callback. In addition to the
 attributes offered by Exception::Class::Base, this class also features the
 attribute C<callback_key>. Use the C<callback_key()> accessor to see what
@@ -185,18 +185,18 @@ C<throw_bad_key>.
 
 =head3 Params::Callback::Exception::Execution
 
-This is the exception thrown by Params::CallbackExec's default exception
+This is the exception thrown by Params::CallbackRequest's default exception
 handler when a callback subroutine or method dies. In addition to the
 attributes offered by Exception::Class::Base, this class also features the
 attributes C<callback_key>, which corresponds to the parameter key that
 triggered the callback, and C<callback_error> which is the error thrown by the
 callback subroutine or method. Params::Callback::Exception::Execution's
-functional alias is C<throw_cb_exec>.
+functional alias is C<throw_cb_request>.
 
 =head3 Params::Callback::Exception::Params
 
 This is the exception thrown when an invalid parameter is passed to
-Params::CallbackExec's or Params::Callback's C<new()> constructors. Its
+Params::CallbackRequest's or Params::Callback's C<new()> constructors. Its
 functional alias is C<throw_bad_params>.
 
 =head3 Params::Callback::Exception::Abort
@@ -213,7 +213,7 @@ functional alias is C<throw_abort>.
 L<Params::Callback|Params::Callback> is the base class for all callback
 classes.
 
-L<Params::CallbackExec|Params::CallbackExec> sets up callbacks for execution.
+L<Params::CallbackRequest|Params::CallbackRequest> sets up callbacks for execution.
 
 L<Exception::Class|Exception::Class> defines the interface for the exception
 classes created here.

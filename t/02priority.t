@@ -1,11 +1,11 @@
 #!perl -w
 
-# $Id: 02priority.t,v 1.3 2003/08/15 22:42:08 david Exp $
+# $Id: 02priority.t,v 1.4 2003/08/18 23:56:09 david Exp $
 
 use strict;
 use Test::More tests => 30;
 
-BEGIN { use_ok('Params::CallbackExec') }
+BEGIN { use_ok('Params::CallbackRequest') }
 
 my $key = 'myCallbackTester';
 my $cbs = [];
@@ -52,12 +52,12 @@ push @$cbs, { pkg_key => $key,
             };
 
 ##############################################################################
-# Construct the CallbackExec object.
+# Construct the CallbackRequest object.
 ##############################################################################
 
-ok( my $cb_exec = Params::CallbackExec->new( callbacks => $cbs),
+ok( my $cb_request = Params::CallbackRequest->new( callbacks => $cbs),
     "Construct CBExec object" );
-isa_ok($cb_exec, 'Params::CallbackExec' );
+isa_ok($cb_request, 'Params::CallbackRequest' );
 
 ##############################################################################
 # Test the callbacks themselves.
@@ -71,13 +71,13 @@ my %params = (  "$key|priority_cb0" => 0,
                 "$key|priority_cb4" => 4,
                 "$key|priority_cb"  => 'def' );
 
-ok( $cb_exec->execute(\%params), "Execute priority callback" );
+ok( $cb_request->request(\%params), "Execute priority callback" );
 is( $params{result}, " 0 1 2 4 6 7 9", "Check priority result" );
 
 ##############################################################################
 # Test the default priority.
 %params = ( "$key|def_priority_cb" => 1);
-ok( $cb_exec->execute(\%params), "Execute default priority callback" );
+ok( $cb_request->request(\%params), "Execute default priority callback" );
 
 ##############################################################################
 # Check various priority values.
@@ -88,7 +88,7 @@ ok( $cb_exec->execute(\%params), "Execute default priority callback" );
                 "$key|chk_priority_cb1" => 1,
                 "$key|chk_priority_cb4" => 4,
                 "$key|chk_priority_cb"  => 2 );
-ok( $cb_exec->execute(\%params), "Execute priority values" );
+ok( $cb_request->request(\%params), "Execute priority values" );
 
 
 1;

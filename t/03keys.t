@@ -1,11 +1,11 @@
 #!perl -w
 
-# $Id: 03keys.t,v 1.2 2003/08/14 05:23:22 david Exp $
+# $Id: 03keys.t,v 1.3 2003/08/18 23:56:09 david Exp $
 
 use strict;
 use Test::More tests => 15;
 
-BEGIN { use_ok('Params::CallbackExec') }
+BEGIN { use_ok('Params::CallbackRequest') }
 
 my $key = 'myCallbackTester';
 my $cbs = [];
@@ -63,19 +63,19 @@ push @$cbs, { pkg_key => $key,
             };
 
 ##############################################################################
-# Construct the CallbackExec object.
+# Construct the CallbackRequest object.
 ##############################################################################
 
-ok( my $cb_exec = Params::CallbackExec->new( callbacks => $cbs),
+ok( my $cb_request = Params::CallbackRequest->new( callbacks => $cbs),
     "Construct CBExec object" );
-isa_ok($cb_exec, 'Params::CallbackExec' );
+isa_ok($cb_request, 'Params::CallbackRequest' );
 
 ##############################################################################
 # Test the callbacks themselves.
 ##############################################################################
 # Test the package key.
 my %params = ( "$key|test_pkg_key_cb" => 1 );
-ok( $cb_exec->execute(\%params), "Execute test_pkg_key callback" );
+ok( $cb_request->request(\%params), "Execute test_pkg_key callback" );
 is( $params{result}, $key, "Check pkg key" );
 
 # And multiple package keys.
@@ -83,13 +83,13 @@ is( $params{result}, $key, "Check pkg key" );
             "$key\_more|test_pkg_key_cb2" => 1,
             "$key|test_pkg_key_cb3" => 1,
           );
-ok( $cb_exec->execute(\%params), "Execute test_pkg_key callback again" );
+ok( $cb_request->request(\%params), "Execute test_pkg_key callback again" );
 is( $params{result}, "$key$key\_more$key", "Check pkg key again" );
 
 ##############################################################################
 # Test the class key.
 %params = ( "$key|test_class_key_cb" => 1 );
-ok( $cb_exec->execute(\%params), "Execute test_class_key callback" );
+ok( $cb_request->request(\%params), "Execute test_class_key callback" );
 is( $params{result}, $key, "Check class key" );
 
 # And multiple class keys.
@@ -97,13 +97,13 @@ is( $params{result}, $key, "Check class key" );
             "$key\_more|test_class_key_cb2" => 1,
             "$key|test_class_key_cb3" => 1,
           );
-ok( $cb_exec->execute(\%params), "Execute test_class_key callback again" );
+ok( $cb_request->request(\%params), "Execute test_class_key callback again" );
 is( $params{result}, "$key$key\_more$key", "Check class key again" );
 
 ##############################################################################
 # Test the trigger key.
 %params = ( "$key|test_trigger_key_cb" => 1 );
-ok( $cb_exec->execute(\%params), "Execute test_trigger_key callback" );
+ok( $cb_request->request(\%params), "Execute test_trigger_key callback" );
 is( $params{result}, "$key|test_trigger_key_cb", "Check trigger key" );
 
 # And multiple trigger keys.
@@ -111,7 +111,7 @@ is( $params{result}, "$key|test_trigger_key_cb", "Check trigger key" );
             "$key\_more|test_trigger_key_cb2" => 1,
             "$key|test_trigger_key_cb3" => 1,);
 
-ok( $cb_exec->execute(\%params), "Execute test_trigger_key callbac again" );
+ok( $cb_request->request(\%params), "Execute test_trigger_key callbac again" );
 is( $params{result}, "$key|test_trigger_key_cb1$key\_more|" .
     "test_trigger_key_cb2$key|test_trigger_key_cb3",
     "Check trigger key again" );

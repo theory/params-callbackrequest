@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 05object.t,v 1.2 2003/08/15 22:42:08 david Exp $
+# $Id: 05object.t,v 1.3 2003/08/18 23:56:09 david Exp $
 
 use strict;
 use Test::More;
@@ -29,7 +29,7 @@ package Params::Callback::TestObjects;
 use strict;
 use base 'Params::Callback';
 __PACKAGE__->register_subclass( class_key => $base_key);
-use Params::Callback::Exceptions abbr => [qw(throw_cb_exec)];
+use Params::Callback::Exceptions abbr => [qw(throw_cb_request)];
 
 sub simple : Callback {
     my $self = shift;
@@ -111,7 +111,7 @@ sub exception : Callback {
     my $self = shift;
     if ($self->value) {
         # Throw an exception object.
-        throw_cb_exec $err_msg;
+        throw_cb_request $err_msg;
     } else {
         # Just die.
         die $err_msg;
@@ -184,19 +184,19 @@ my %classes = ( $base_key           => 'Params::Callback::TestObjects',
                 $base_key . 'Sub'   => 'Params::Callback::TestObjects::Sub',
                 $base_key . 'Empty' => 'Params::Callback::TestObjects::Empty');
 
-use_ok('Params::CallbackExec');
+use_ok('Params::CallbackRequest');
 my $all = 'ALL';
 for my $key ($base_key, $base_key . "Empty", $all) {
     # Create the CBExec object.
-    my $cb_exec;
+    my $cb_request;
     if ($key eq 'ALL') {
         # Load all of the callback classes.
-        ok( $cb_exec = Params::CallbackExec->new( cb_classes => $key ),
+        ok( $cb_request = Params::CallbackRequest->new( cb_classes => $key ),
             "Construct $key CBExec object" );
         $key = $base_key;
     } else {
         # Load the base class and the subclass.
-        ok( $cb_exec = Params::CallbackExec->new
+        ok( $cb_request = Params::CallbackRequest->new
             ( cb_classes => [$key, $base_key . 'Sub']),
             "Construct $key CBExec object" );
     }
@@ -204,63 +204,63 @@ for my $key ($base_key, $base_key . "Empty", $all) {
     ##########################################################################
     # Now make sure that the simple callback executes.
     my %params = ("$key|simple_cb" => 1);
-    ok( $cb_exec->execute(\%params), "Execute simple callback" );
+    ok( $cb_request->request(\%params), "Execute simple callback" );
     is( $params{result}, 'Simple Success', "Check simple result" );
 
     ##########################################################################
     # And the "complete" callback.
     %params = ("$key|complete_cb" => 1);
-    ok( $cb_exec->execute(\%params), "Execute complete callback" );
+    ok( $cb_request->request(\%params), "Execute complete callback" );
     is( $params{result}, 'Complete Success', "Check complete result" );
 
     ##########################################################################
     # Check the class name.
     %params = ("$key|inherit_cb" => 1);
-    ok( $cb_exec->execute(\%params), "Execute inherit callback" );
+    ok( $cb_request->request(\%params), "Execute inherit callback" );
     is( $params{result}, 'Yes', "Check inherit result" );
 
     ##########################################################################
     # Check class inheritance and SUPER method calls.
     %params = ($base_key . "Sub|inherit_cb" => 1);
-    ok( $cb_exec->execute(\%params), "Execute SUPER inherit callback" );
+    ok( $cb_request->request(\%params), "Execute SUPER inherit callback" );
     is( $params{result}, 'Yes and Yes', "Check SUPER inherit result" );
 
     ##########################################################################
     # Try pre-execution callbacks.
     %params = (do_upper => 1,
                result   => 'upPer_mE');
-    ok( $cb_exec->execute(\%params), "Execute pre callback" );
+    ok( $cb_request->request(\%params), "Execute pre callback" );
     is( $params{result}, 'UPPER_ME', "Check pre result" );
 
     ##########################################################################
     # Try post-execution callbacks.
     %params = ("$key|simple_cb" => 1,
                do_lower => 1);
-    ok( $cb_exec->execute(\%params), "Execute post callback" );
+    ok( $cb_request->request(\%params), "Execute post callback" );
     is( $params{result}, 'simple success', "Check post result" );
 
     ##########################################################################
     # Try a method defined only in a subclass.
     %params = ($base_key . "Sub|subsimple_cb" => 1);
-    ok( $cb_exec->execute(\%params), "Execute subsimple callback" );
+    ok( $cb_request->request(\%params), "Execute subsimple callback" );
     is( $params{result}, 'Subsimple Success', "Check subsimple result" );
 
     ##########################################################################
     # Try a method that overrides its parent but doesn't call its parent.
     %params = ($base_key . "Sub|simple_cb" => 1);
-    ok( $cb_exec->execute(\%params), "Execute oversimple callback" );
+    ok( $cb_request->request(\%params), "Execute oversimple callback" );
     is( $params{result}, 'Oversimple Success', "Check oversimple result" );
 
     ##########################################################################
     # Try a method that overrides its parent but doesn't call its parent.
     %params = ($base_key . "Sub|simple_cb" => 1);
-    ok( $cb_exec->execute(\%params), "Execute oversimple callback" );
+    ok( $cb_request->request(\%params), "Execute oversimple callback" );
     is( $params{result}, 'Oversimple Success', "Check oversimple result" );
 
     ##########################################################################
     # Check that the proper class ojbect is constructed.
     %params = ("$key|class_cb" => $classes{$key});
-    ok( $cb_exec->execute(\%params), "Execute class callback" );
+    ok( $cb_request->request(\%params), "Execute class callback" );
 
     ##########################################################################
     # Check priority execution order for multiple callbacks.
@@ -272,14 +272,14 @@ for my $key ($base_key, $base_key . "Empty", $all) {
                "$key|chk_priority_cb4"  => 4,
                "$key|chk_priority_cb"   => 'def',
               );
-    ok( $cb_exec->execute(\%params), "Execute priority order callback" );
+    ok( $cb_request->request(\%params), "Execute priority order callback" );
     is($params{result}, " 0 1 2 4 5 7 9", "Check priority order result" );
 
     ##########################################################################
     # Emulate the sumission of an <input type="image" /> button.
     %params = ("$key|simple_cb.x" => 18,
                "$key|simple_cb.y" => 22 );
-    ok( $cb_exec->execute(\%params), "Execute image  callback" );
+    ok( $cb_request->request(\%params), "Execute image  callback" );
     is( $params{result}, 'Simple Success', "Check single simple result" );
 
     ##########################################################################
@@ -287,25 +287,25 @@ for my $key ($base_key, $base_key . "Empty", $all) {
     %params = ("$key|test_abort_cb0" => 1,
                "$key|simple_cb" => 1,
                 result => 'still here' );
-    ok( $cb_exec->execute(\%params), "Execute abort callback" );
+    ok( $cb_request->request(\%params), "Execute abort callback" );
     is( $params{result}, 'still here', "Check abort result" );
 
     ##########################################################################
     # Test aborted for a false value.
     %params = ("$key|test_aborted_cb" => 0 );
-    ok( $cb_exec->execute(\%params), "Execute false aborted callback" );
+    ok( $cb_request->request(\%params), "Execute false aborted callback" );
     is( $params{result}, 'no', "Check false aborted result" );
 
     ##########################################################################
     # Test aborted for a true value.
     %params = ("$key|test_aborted_cb" => 1 );
-    ok( $cb_exec->execute(\%params), "Execute true aborted callback" );
+    ok( $cb_request->request(\%params), "Execute true aborted callback" );
     is( $params{result}, 'yes', "Check true aborted result" );
 
     ##########################################################################
     # Try throwing an execption.
     %params = ("$key|exception_cb" => 1 );
-    eval { $cb_exec->execute(\%params) };
+    eval { $cb_request->request(\%params) };
     ok( my $err = $@, "Catch $key exception" );
     isa_ok($err, 'Params::Callback::Exception');
     isa_ok($err, 'Params::Callback::Exception::Execution');
@@ -314,7 +314,7 @@ for my $key ($base_key, $base_key . "Empty", $all) {
     ##########################################################################
     # Try die'ing.
     %params = ("$key|exception_cb" => 0 );
-    eval { $cb_exec->execute(\%params) };
+    eval { $cb_request->request(\%params) };
     ok( $err = $@, "Catch $key die" );
     isa_ok($err, 'Params::Callback::Exception');
     isa_ok($err, 'Params::Callback::Exception::Execution');
@@ -326,12 +326,12 @@ for my $key ($base_key, $base_key . "Empty", $all) {
     # same class.
     %params = ("$key|same_object_cb1" => 0,
                "$key|same_object_cb" => 1);
-    ok( $cb_exec->execute(\%params), "Execute same object callback" );
+    ok( $cb_request->request(\%params), "Execute same object callback" );
 
     ##########################################################################
     # Check priority 0 sticks.
     %params = ("$key|highest_cb" => undef);
-    ok( $cb_exec->execute(\%params), "Execute check priority 0 attribute" );
+    ok( $cb_request->request(\%params), "Execute check priority 0 attribute" );
 }
 
 __END__

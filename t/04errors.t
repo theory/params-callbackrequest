@@ -1,11 +1,11 @@
 #!perl -w
 
-# $Id: 04errors.t,v 1.3 2003/08/16 00:48:48 david Exp $
+# $Id: 04errors.t,v 1.4 2003/08/18 23:56:09 david Exp $
 
 use strict;
 use Test::More tests => 50;
 
-BEGIN { use_ok('Params::CallbackExec') }
+BEGIN { use_ok('Params::CallbackRequest') }
 
 my $key = 'myCallbackTester';
 
@@ -29,14 +29,14 @@ my %fault_cb = ( pkg_key => $key,
     local $SIG{__WARN__} = sub {
         like( $_[0], qr/You didn't specify any callbacks/, "Check warning")
     };
-    ok( Params::CallbackExec->new, "Construct CBExec object without CBs" );
+    ok( Params::CallbackRequest->new, "Construct CBExec object without CBs" );
 }
 
 ##############################################################################
 # Try to construct a CBE object with a bad callback key.
 my %c = %cbs;
 $c{cb_key} = '';
-eval {Params::CallbackExec->new(callbacks => [\%c]) };
+eval {Params::CallbackRequest->new(callbacks => [\%c]) };
 ok( my $err = $@, "Catch bad cb_key exception" );
 isa_ok($err, 'Params::Callback::Exception' );
 isa_ok($err, 'Params::Callback::Exception::Params' );
@@ -47,7 +47,7 @@ like( $err->error, qr/Missing or invalid callback key/,
 # Try to construct a CBE object with a bad priority.
 %c = %cbs;
 $c{priority} = 'foo';
-eval {Params::CallbackExec->new(callbacks => [\%c]) };
+eval {Params::CallbackRequest->new(callbacks => [\%c]) };
 ok( $err = $@, "Catch bad priority exception" );
 isa_ok($err, 'Params::Callback::Exception' );
 isa_ok($err, 'Params::Callback::Exception::Params' );
@@ -61,7 +61,7 @@ my $msg = "Callback for package key 'myCallbackTester' and callback key " .
 %c = %cbs;
 $c{cb_key} = 'coderef';
 $c{cb} = 'bogus'; # Ooops.
-eval {Params::CallbackExec->new(callbacks => [\%c]) };
+eval {Params::CallbackRequest->new(callbacks => [\%c]) };
 ok( $err = $@, "Catch bad code ref exception" );
 isa_ok($err, 'Params::Callback::Exception' );
 isa_ok($err, 'Params::Callback::Exception::Params' );
@@ -71,7 +71,7 @@ like( $err->error, qr/$msg/, "Check bad code ref error message" );
 # Test for a used key.
 %c = my %b = %cbs;
 $c{cb_key} = $b{cb_key} = 'bar'; # Ooops.
-eval {Params::CallbackExec->new(callbacks => [\%c, \%b]) };
+eval {Params::CallbackRequest->new(callbacks => [\%c, \%b]) };
 ok( $err = $@, "Catch used key exception" );
 isa_ok($err, 'Params::Callback::Exception' );
 isa_ok($err, 'Params::Callback::Exception::Params' );
@@ -81,7 +81,7 @@ like( $err->error,
 
 ##############################################################################
 # Test a bad request code ref.
-eval {Params::CallbackExec->new(pre_callbacks => ['foo']) };
+eval {Params::CallbackRequest->new(pre_callbacks => ['foo']) };
 ok( $err = $@, "Catch bad request code ref exception" );
 isa_ok($err, 'Params::Callback::Exception' );
 isa_ok($err, 'Params::Callback::Exception::Params' );
@@ -92,9 +92,9 @@ like( $err->error,
 ##############################################################################
 # Make sure that Params::Validate is using our exceptions.
 $msg = 'The following parameter was passed in the call to ' .
-  'Params::CallbackExec::new but was not listed in the validation options: ' .
+  'Params::CallbackRequest::new but was not listed in the validation options: ' .
   'feh';
-eval {Params::CallbackExec->new(feh => 1) };
+eval {Params::CallbackRequest->new(feh => 1) };
 ok( $err = $@, "Catch bad parameter exception" );
 isa_ok($err, 'Params::Callback::Exception' );
 isa_ok($err, 'Params::Callback::Exception::Params' );
@@ -103,13 +103,13 @@ like( $err->error, qr/$msg/, 'Check bad parameter exception' );
 ##############################################################################
 # Construct one to be used for exceptions during the execution of callbacks.
 ##############################################################################
-ok( my $cb_exec = Params::CallbackExec->new( callbacks => [\%cbs, \%fault_cb]),
+ok( my $cb_request = Params::CallbackRequest->new( callbacks => [\%cbs, \%fault_cb]),
     "Construct CBExec object" );
-isa_ok($cb_exec, 'Params::CallbackExec' );
+isa_ok($cb_request, 'Params::CallbackRequest' );
 
 ##############################################################################
 # Send a bad argument to execute().
-eval { $cb_exec->execute('foo') }; # oops!
+eval { $cb_request->request('foo') }; # oops!
 ok( $err = $@, "Catch bad argument exception" );
 isa_ok($err, 'Params::Callback::Exception' );
 isa_ok($err, 'Params::Callback::Exception::Params' );
@@ -121,7 +121,7 @@ like( $err->error, qr/Parameter 'foo' is not a hash reference/,
 ##############################################################################
 # Make sure an exception get thrown for a non-existant package.
 my %params = ( 'NoSuchLuck|foo_cb' => 1 );
-eval { $cb_exec->execute(\%params) };
+eval { $cb_request->request(\%params) };
 ok( $err = $@, "Catch bad package exception" );
 isa_ok($err, 'Params::Callback::Exception' );
 isa_ok($err, 'Params::Callback::Exception::InvalidKey' );
@@ -131,7 +131,7 @@ like( $err->error, qr/No such callback package 'NoSuchLuck'/,
 ##############################################################################
 # Make sure an exception get thrown for a non-existant callback.
 %params = ( "$key|foo_cb" => 1 );
-eval { $cb_exec->execute(\%params) };
+eval { $cb_request->request(\%params) };
 ok( $err = $@, "Catch missing callback exception" );
 isa_ok($err, 'Params::Callback::Exception' );
 isa_ok($err, 'Params::Callback::Exception::InvalidKey' );
@@ -141,7 +141,7 @@ like( $err->error, qr/No callback found for callback key '$key|foo_cb'/,
 ##############################################################################
 # Now die from within our callback function.
 %params = ( "$key|mydie_cb" => 1 );
-eval { $cb_exec->execute(\%params) };
+eval { $cb_request->request(\%params) };
 ok( $err = $@, "Catch our exception" );
 isa_ok($err, 'Params::Callback::Exception' );
 isa_ok($err, 'Params::Callback::Exception::Execution' );
@@ -152,19 +152,19 @@ like( $err->callback_error, qr/^Ouch! at/, "Check our die message" );
 ##############################################################################
 # Now throw our own exception.
 %params = ( "$key|myfault_cb" => 1 );
-eval { $cb_exec->execute(\%params) };
+eval { $cb_request->request(\%params) };
 ok( $err = $@, "Catch our exception" );
 isa_ok($err, 'TestException' );
 
 ##############################################################################
 # Now test exception_handler.
 %params = ( "$key|mydie_cb" => 1 );
-ok( $cb_exec = Params::CallbackExec->new
+ok( $cb_request = Params::CallbackRequest->new
     ( callbacks            => [\%cbs],
       exception_handler => sub {
           like( $_[0], qr/^Ouch! at/, "Custom check our die message" );
       }), "Construct CBExec object with custom exception handler" );
-eval { $cb_exec->execute(\%params) };
+eval { $cb_request->request(\%params) };
 
 
 1;

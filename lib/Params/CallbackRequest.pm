@@ -1,9 +1,9 @@
-package Params::CallbackExec;
+package Params::CallbackRequest;
 
 use strict;
 use Params::Validate ();
-use Params::Callback::Exceptions (abbr => [qw(throw_bad_params throw_no_cb
-                                              throw_cb_exec)]);
+use Params::Callback::Exceptions (abbr => [qw(throw_bad_params throw_bad_key
+                                              throw_cb_request)]);
 
 use vars qw($VERSION);
 $VERSION = 1.10;
@@ -38,7 +38,7 @@ my $valid_cb_classes = sub {
 my $exception_handler = sub {
     my $err = shift;
     rethrow_exception($err) if ref $err;
-    throw_cb_exec error          => "Error thrown by callback: $err",
+    throw_cb_request error          => "Error thrown by callback: $err",
                   callback_error => $err;
 };
 
@@ -167,7 +167,7 @@ sub new {
 }
 
 
-sub execute {
+sub request {
     my ($self, $params) = @_;
     return $self unless $params;
     throw_bad_params "Parameter '$params' is not a hash reference"
@@ -218,14 +218,14 @@ sub execute {
                 # Find the callback.
                 my $cb;
                 my $class = $self->{_cbs}{$pkg_key} or
-                  throw_no_cb error        => "No such callback package " .
+                  throw_bad_key error        => "No such callback package " .
                                               "'$pkg_key'",
                               callback_key => $chk;
 
                 if (ref $class) {
                     # It's a functional callback. Grab it.
                     $cb = $class->{$cb_key}{cb} or
-                      throw_no_cb error        => "No callback found for " .
+                      throw_bad_key error        => "No callback found for " .
                                                   "callback key '$chk'",
                                   callback_key => $chk;
 
@@ -237,7 +237,7 @@ sub execute {
                 } else {
                     # It's a method callback. Get it from the class.
                     $cb = $class->_get_callback($cb_key, \$priority) or
-                      throw_no_cb error        => "No callback found for " .
+                      throw_bad_key error        => "No callback found for " .
                                                    "callback key '$chk'",
                                   callback_key => $chk;
                 }
@@ -246,7 +246,7 @@ sub execute {
                 # for the construction of the Params::Callback object that
                 # will be passed to it.
                 $cbhs{$class} ||= $class->new( params  => $params,
-                                               cb_exec => $self,
+                                               cb_request => $self,
                                              );
                 push @{$cbs[$priority]},
                   [ $cb, $cbhs{$class},
@@ -259,7 +259,7 @@ sub execute {
     # Put any pre and post request callbacks onto the stack.
     if ($self->{_pre} or $self->{_post}) {
         my $params = [ params  => $params,
-                       cb_exec => $self ];
+                       cb_request => $self ];
         unshift @cbs,
           [ map { [ $_->[0], $cbhs{$_} || $_->[1]->new(@$params), [] ] }
             @{$self->{_pre}} ]
@@ -305,14 +305,14 @@ __END__
 
 =head1 NAME
 
-Params::CallbackExec - Functional and object-oriented callback architecture
+Params::CallbackRequest - Functional and object-oriented callback architecture
 
 =head1 SYNOPSIS
 
 Functional parameter-triggered callbacks:
 
   use strict;
-  use Params::CallbackExec;
+  use Params::CallbackRequest;
 
   # Set up callbacks.
   sub calc_time {
@@ -322,14 +322,14 @@ Functional parameter-triggered callbacks:
       $params->{my_time} = localtime($val || time);
   }
 
-  my $cb_exec = Params::CallbackExec
+  my $cb_request = Params::CallbackRequest
     ( callbacks => [ { cb_key  => 'calc_time',
                        pkg_key => 'myCallbacker',
                        cb      => \&calc_time } ]
     );
 
   my %params = ('myCallbacker|calc_time_cb' => 1);
-  $cb_exec->execute(\%params);
+  $cb_request->request(\%params);
   print "The time is $params{my_time}\n";
 
 
@@ -350,22 +350,22 @@ And then, in your application:
 
   # Load order is important here!
   use MyApp::Callback;
-  use Params::CallbackExec;
+  use Params::CallbackRequest;
 
-  my $cb_exec = Params::Callback->new( cb_classes => [qw(myCallbacker)] );
+  my $cb_request = Params::Callback->new( cb_classes => [qw(myCallbacker)] );
   my %params = ('myCallbacker|calc_time_cb' => 1);
-  $cb_exec->execute(\%params);
+  $cb_request->request(\%params);
   print "The time is $params{my_time}\n";
 
 =begin comment
 
 =head1 ABSTRACT
 
-Params::CallbackExec provides functional and object-oriented callbacks to
+Params::CallbackRequest provides functional and object-oriented callbacks to
 method and function parameters. Callbacks can either be request callbacks
-triggered for every call to C<execute()> method, or can be triggered by
+triggered for every call to C<request()> method, or can be triggered by
 special parameter hash key names. Although potentially useful in any Perl
-application, Params::CallbackExec was designed to be used with web
+application, Params::CallbackRequest was designed to be used with web
 applications, where the parameters submitted by the browser may be configured
 specifically to trigger callbacks on the server.
 
@@ -373,12 +373,12 @@ specifically to trigger callbacks on the server.
 
 =head1 DESCRIPTION
 
-Params::CallbackExec provides functional and object-oriented callbacks to
+Params::CallbackRequest provides functional and object-oriented callbacks to
 method and function parameters. Callbacks may be either code references
 provided to the C<new()> constructor, or methods defined in subclasses of
 Params::Callback. Callbacks are triggered either for every call to the
-Params::CallbackExec C<execute()> method, or by specially named keys in the
-parameters to C<execute()>.
+Params::CallbackRequest C<request()> method, or by specially named keys in the
+parameters to C<request()>.
 
 The idea behind this module is to provide a sort of plugin architecture for
 Perl templating systems. Callbacks are executed by the contents of a request
@@ -450,7 +450,7 @@ just I<way cool.>
 
 =head1 USAGE
 
-Params::CallbackExec supports two different types of callbacks: those
+Params::CallbackRequest supports two different types of callbacks: those
 triggered by a specially named parameter keys, and those executed for every
 request.
 
@@ -465,15 +465,15 @@ a callback field might be specified like this:
 
   my $params = { "world|save_cb" => 'Save World' };
 
-When the parameters hash $params is passed to Params::CallbackExec's
-C<execute()> method, the C<world|save_cb> parameter would trigger the callback
+When the parameters hash $params is passed to Params::CallbackRequest's
+C<request()> method, the C<world|save_cb> parameter would trigger the callback
 associated with the "save" callback key in the "world" package. If such a
-callback hasn't been configured, then Params::CallbackExec will throw a
+callback hasn't been configured, then Params::CallbackRequest will throw a
 Params::Callback::Exceptions::InvalidKey exception. Here's how to configure a
-functional callback when constructing your Params::CallbackExec object so that
+functional callback when constructing your Params::CallbackRequest object so that
 that doesn't happen:
 
-  my $cb_exec = Params::CallbackExec->new
+  my $cb_request = Params::CallbackRequest->new
     ( callbacks => [ { pkg_key => 'world',
                        cb_key  => 'save',
                        cb      => \&My::World::save } ] );
@@ -482,12 +482,12 @@ With this configuration, the C<world|save_cb> parameter key will trigger the
 execution of the C<My::World::save()> subroutine:
 
   # Execute parameter-triggered callback.
-  $cb_exec->execute($params);
+  $cb_request->request($params);
 
 =head3 Functional Callback Subroutines
 
 Functional callbacks use a code reference for parameter-triggered callbacks,
-and Params::CallbackExec executes them with a single argument, a
+and Params::CallbackRequest executes them with a single argument, a
 Params::Callback object. Thus, a callback subroutine will generally look
 something like this:
 
@@ -501,11 +501,11 @@ callback, including the callback key, the package key, and the parameter
 hash. It also includes an C<abort()> method. See the
 L<Params::Callback|Params::Callback> documentation for all the goodies.
 
-Note that Params::CallbackExec installs an exception handler in
+Note that Params::CallbackRequest installs an exception handler in
 C<$SIG{__DIE__}> during the execution of callbacks, so if any of your callback
-subroutines C<die>, Params::CallbackExec will throw an
+subroutines C<die>, Params::CallbackRequest will throw an
 Params::Callback::Exception::Execution exception. If your callback subroutines
-throw their own exception objects, Params::CallbackExec will simply rethrow
+throw their own exception objects, Params::CallbackRequest will simply rethrow
 them. If you don't like this configuration, use the C<exception_handler>
 parameter to install your own exception handler.
 
@@ -531,7 +531,7 @@ custom C<$SIG{__DIE__}> exception handler. Again see the C<exception_handler>
 parameter to install your own exception handler.
 
 B<Note:> Under mod_perl, it's important that you C<use> any and all
-MasonX::Callback subclasses I<before> you C<use Params::CallbackExec>. This is
+MasonX::Callback subclasses I<before> you C<use Params::CallbackRequest>. This is
 to get around an issue with identifying the names of the callback methods in
 mod_perl. Read the comments in the MasonX::Callback source code if you're
 interested in learning more.
@@ -544,12 +544,12 @@ packages. The idea is that the package key will uniquely identify the module
 in which each callback subroutine is found, but it doesn't necessarily have to
 be so. Use the package key any way you wish, or not at all:
 
-  my $cb_exec = Params::CallbackExec->new
+  my $cb_request = Params::CallbackRequest->new
     ( callbacks => [ { cb_key  => 'save',
                        cb      => \&My::World::save } ] );
 
 But note that if you don't use the package key at all, you'll still need to
-provide one in the parameter hash passed to C<execute()>. By default, that key
+provide one in the parameter hash passed to C<request()>. By default, that key
 is "DEFAULT". Such a callback parameter would then look like this:
 
   my $params = { "DEFAULT|save_cb" => 'Save World' };
@@ -557,7 +557,7 @@ is "DEFAULT". Such a callback parameter would then look like this:
 If you don't like the "DEFAULT" package name, you can set an alternative
 default using the C<default_pkg_name> parameter to C<new()>:
 
-  my $cb_exec = Params::CallbackExec->new
+  my $cb_request = Params::CallbackRequest->new
     ( callbacks        => [ { cb_key  => 'save',
                               cb      => \&My::World::save } ],
       default_pkg_name => 'MyPkg' );
@@ -566,7 +566,7 @@ Then, of course, any callbacks without a specified package key of their own
 must then use the custom default:
 
   my $params = { "MyPkg|save_cb" => 'Save World' };
-  $cb_exec->execute($params);
+  $cb_request->request($params);
 
 =head3 The Class Key
 
@@ -608,7 +608,7 @@ In such a case, you can set a higher priority level for the setup callback
 than for callbacks that depend on it. For functional callbacks, you can do it
 like this:
 
-  my $cb_exec = Params::CallbackExec->new
+  my $cb_request = Params::CallbackRequest->new
     ( callbacks        => [ { cb_key   => 'setup',
                               priority => 3,
                               cb       => \&setup },
@@ -646,7 +646,7 @@ to C<new()> for functional callbacks and the C<default_priority> to the class
 declaration for object-oriented callbacks For example, this functional
 callback configuration:
 
-  my $cb_exec = Params::CallbackExec->new
+  my $cb_request = Params::CallbackRequest->new
     ( callbacks        => [ { cb_key   => 'setup',
                               priority => 3,
                               cb       => \&setup },
@@ -684,7 +684,7 @@ parameter-triggered callbacks. Functional request callbacks may be specified
 via the C<pre_callbacks> and C<post_callbacks> parameters to C<new()>,
 respectively:
 
-  my $cb_exec = Params::CallbackExec->new
+  my $cb_request = Params::CallbackRequest->new
     ( pre_callbacks  => [ \&translate, \&foobarate ],
       post_callbacks => [ \&escape, \&negate ] );
 
@@ -740,7 +740,7 @@ C<exception_handler> parameter to C<new()> if you don't like this.
 
 =head2 Parameters To The C<new()> Constructor
 
-Params::CallbackExec supports a number of its own parameters to the C<new()>
+Params::CallbackRequest supports a number of its own parameters to the C<new()>
 constructor (though none of them, sadly, trigger callbacks).The parameters to
 C<new()> are as follows:
 
@@ -763,10 +763,10 @@ will trigger the execution of the callback.
 =item C<cb>
 
 Required. A reference to the Perl subroutine that will be executed when the
-C<cb_key> has been found in a parameter hash passed to C<execute()>. Each code
+C<cb_key> has been found in a parameter hash passed to C<request()>. Each code
 reference should expect a single argument: a Params::Callback object. The same
 instance of a Params::Callback object will be used for all functional
-callbacks in a single call to C<execute()>.
+callbacks in a single call to C<request()>.
 
 =item C<pkg_key>
 
@@ -780,7 +780,7 @@ C<default_pkg_key> parameter to C<new()>.
 
 Optional. Indicates the level of priority of a callback. Some callbacks are
 more important than others, and should be executed before the
-others. Params::CallbackExec supports priority levels ranging from "0"
+others. Params::CallbackRequest supports priority levels ranging from "0"
 (highest priority) to "9" (lowest priority). The default priority for
 functional callbacks may be set via the C<default_priority> parameter.
 
@@ -789,38 +789,38 @@ functional callbacks may be set via the C<default_priority> parameter.
 =item C<pre_callbacks>
 
 This parameter accepts an array reference of code references that should be
-executed for I<every> call to C<execute()> I<before> any parameter-triggered
+executed for I<every> call to C<request()> I<before> any parameter-triggered
 callbacks. They will be executed in the order in which they're listed in the
 array reference. Each code reference should expect a Params::Callback object
 as its sole argument. The same instance of a Params::Callback object will be
-used for all functional callbacks in a single call to C<execute()>. Use
+used for all functional callbacks in a single call to C<request()>. Use
 pre-parameter-triggered request callbacks when you want to do something with
-the parameters submitted for every call to C<execute()>, such as convert
+the parameters submitted for every call to C<request()>, such as convert
 character sets.
 
 =item C<post_callbacks>
 
 This parameter accepts an array reference of code references that should be
-executed for I<every> call to C<execute()> I<after> all parameter-triggered
+executed for I<every> call to C<request()> I<after> all parameter-triggered
 callbacks have been called. They will be executed in the order in which
 they're listed in the array reference. Each code reference should expect a
 Params::Callback object as its sole argument. The same instance of a
 Params::Callback object will be used for all functional callbacks in a single
-call to C<execute()>. Use post-parameter-triggered request callbacks when you
+call to C<request()>. Use post-parameter-triggered request callbacks when you
 want to do something with the parameters submitted for every call to
-C<execute()>, such as encode or escape their values for presentation.
+C<request()>, such as encode or escape their values for presentation.
 
 =item C<cb_classes>
 
 An array reference listing the class keys of all of the Params::Callback
 subclasses containing callback methods that you want included in your
-Params::CallbackExec object. Alternatively, the C<cb_classes> parameter may
+Params::CallbackRequest object. Alternatively, the C<cb_classes> parameter may
 simply be the word "ALL", in which case I<all> Params::Callback subclasses
-will have their callback methods registered with your Params::CallbackExec
+will have their callback methods registered with your Params::CallbackRequest
 object. See the L<Params::Callback|Params::Callback> documentation for details
 on creating callback classes and methods.
 
-B<Note:> In a mod_perl environment, be sure to C<use Params::CallbackExec>
+B<Note:> In a mod_perl environment, be sure to C<use Params::CallbackRequest>
 I<only> after you've C<use>d all of the Params::Callback subclasses you need
 or else you won't be able to use their callback methods.
 
@@ -843,7 +843,7 @@ key. It can be any string that evaluates to a true value, and defaults to
 
 =item C<ignore_nulls>
 
-By default, Params::CallbackExec will execute all request callbacks. However,
+By default, Params::CallbackRequest will execute all request callbacks. However,
 in many situations it may be desirable to skip any callbacks that have no
 value for the callback field. One can do this by simply checking C<<
 $cbh->value >> in the callback, but if you need to disable the execution of
@@ -853,7 +853,7 @@ a false value by default.
 
 =item C<exception_handler>
 
-Params::CallbackExec installs a custom exception handler into C<$SIG{__DIE__}>
+Params::CallbackRequest installs a custom exception handler into C<$SIG{__DIE__}>
 during the execution of callbacks. This custom exception handler will simply
 rethrow any exception objects it comes across, but will throw a
 Params::Callback::Exception::Execution exception object if it is passed only a
@@ -867,15 +867,15 @@ a code reference to do what you need.
 
 =head2 Instance Methods
 
-Params::CallbackExec of course has several instance methods. I cover the most
+Params::CallbackRequest of course has several instance methods. I cover the most
 important, first.
 
-=head3 C<execute()>
+=head3 C<request()>
 
-  $cb_exec->execute(\%params);
+  $cb_request->request(\%params);
 
-Executes the callbacks specified when the Params::CallbackExec object was
-created. A single call to C<execute()> is referred to as a callback
+Executes the callbacks specified when the Params::CallbackRequest object was
+created. A single call to C<request()> is referred to as a callback
 request. First, all pre-request callbacks are executed. Then, any
 parameter-triggered callbacks triggered by the keys in the parameter hash
 reference passed as the sole argument are executed. And finally, all
@@ -888,7 +888,7 @@ of course also prevent any subsequent callbacks from executing, and in
 addition must also be caught by the caller or the whole process will
 terminate:
 
-  eval { $cb_exec->execute(\%params) };
+  eval { $cb_request->request(\%params) };
   if (my $err = $@) {
       # Handle exception.
   }
@@ -898,9 +898,9 @@ terminate:
 The properties C<default_priority> and C<default_pkg_key> have standard
 read-only accessor methods of the same name. For example:
 
-  my $cb_exec = Params::CallbackExec->new;
-  my $default_priority = $cb_exec->default_priority;
-  my $default_pkg_key = $cb_exec->default_pkg_key;
+  my $cb_request = Params::CallbackRequest->new;
+  my $default_priority = $cb_request->default_priority;
+  my $default_pkg_key = $cb_request->default_pkg_key;
 
 =head1 ACKNOWLEDGMENTS
 
@@ -911,7 +911,7 @@ for planting this great idea!
 =head1 BUGS
 
 Please report all bugs via the CPAN Request Tracker at
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Params-CallbackExec>.
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Params-CallbackRequest>.
 
 =head1 SEE ALSO
 

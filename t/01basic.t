@@ -1,11 +1,11 @@
 #!perl -w
 
-# $Id: 01basic.t,v 1.4 2003/08/16 01:17:38 david Exp $
+# $Id: 01basic.t,v 1.5 2003/08/18 23:56:09 david Exp $
 
 use strict;
 use Test::More tests => 55;
 
-BEGIN { use_ok('Params::CallbackExec') }
+BEGIN { use_ok('Params::CallbackRequest') }
 
 my $key = 'myCallbackTester';
 my $cbs = [];
@@ -17,7 +17,7 @@ my $cbs = [];
 sub simple {
     my $cb = shift;
     isa_ok( $cb, 'Params::Callback' );
-    isa_ok( $cb->cb_exec, 'Params::CallbackExec' );
+    isa_ok( $cb->cb_request, 'Params::CallbackRequest' );
     my $params = $cb->params;
     $params->{result} = 'Success';
 }
@@ -164,40 +164,40 @@ sub flip {
 }
 
 ##############################################################################
-# Construct the CallbackExec object.
+# Construct the CallbackRequest object.
 ##############################################################################
 
-ok( my $cb_exec = Params::CallbackExec->new( callbacks      => $cbs,
+ok( my $cb_request = Params::CallbackRequest->new( callbacks      => $cbs,
                                              post_callbacks => [\&upper],
                                              pre_callbacks  => [\&flip] ),
     "Construct CBExec object" );
-isa_ok($cb_exec, 'Params::CallbackExec' );
+isa_ok($cb_request, 'Params::CallbackRequest' );
 
 ##############################################################################
 # Test the callbacks themselves.
 ##############################################################################
 # Try a Simple callback.
 my %params = ( "$key|simple_cb" => 1 );
-ok( $cb_exec->execute(\%params), "Execute simple callback" );
+ok( $cb_request->request(\%params), "Execute simple callback" );
 is( $params{result}, 'Success', "Check simple result" );
 
 ##############################################################################
 # Test an array reference value.
 %params = (  "$key|array_count_cb" => [1,2,3,4,5] );
-ok( $cb_exec->execute(\%params), "Execute array count callback" );
+ok( $cb_request->request(\%params), "Execute array count callback" );
 is( $params{result}, 5, "Check array count result" );
 
 ##############################################################################
 # Test a hash reference.
 %params = (  "$key|hash_check_cb" => { one => 1 } );
-ok( $cb_exec->execute(\%params), "Execute hash check callback" );
+ok( $cb_request->request(\%params), "Execute hash check callback" );
 is( $params{result}, $params{"$key|hash_check_cb"},
     "Check hash check result" );
 
 ##############################################################################
 # Test a code reference.
 %params = (  "$key|code_check_cb" => sub { 'yes!' } );
-ok( $cb_exec->execute(\%params), "Execute code callback" );
+ok( $cb_request->request(\%params), "Execute code callback" );
 is( $params{result}, 'yes!', "Check code result" );
 
 ##############################################################################
@@ -205,7 +205,7 @@ is( $params{result}, 'yes!', "Check code result" );
 # properly executed.
 %params = ( "$key|simple_cb.x" => 18,
             "$key|simple_cb.y" => 24 );
-ok( $cb_exec->execute(\%params), "Execute image button callback" );
+ok( $cb_request->request(\%params), "Execute image button callback" );
 is( $params{result}, 'Success', "Check image button result" );
 
 ##############################################################################
@@ -213,7 +213,7 @@ is( $params{result}, 'Success', "Check image button result" );
 # only once.
 %params = ( "$key|count_cb.x" => 18,
             "$key|count_cb.y" => 24 );
-ok( $cb_exec->execute(\%params), "Execute image button count callback" );
+ok( $cb_request->request(\%params), "Execute image button count callback" );
 is( $params{result}, 1, "Check image button count result" );
 
 ##############################################################################
@@ -223,7 +223,7 @@ is( $params{result}, 1, "Check image button count result" );
             "$key|count_cb1.y" => 24,
             "$key|count_cb2.x" => 18,
             "$key|count_cb2.y" => 24 );
-ok( $cb_exec->execute(\%params), "Execute image button priority callback" );
+ok( $cb_request->request(\%params), "Execute image button priority callback" );
 is( $params{result}, 2, "Check image button priority result" );
 
 ##############################################################################
@@ -231,13 +231,13 @@ is( $params{result}, 2, "Check image button priority result" );
 # cause it to prevent simple from being called.
 %params = ( "$key|simple_cb" => 1,
             "$key|test_abort_cb0" => 1 );
-ok( $cb_exec->execute(\%params), "Execute abort callback" );
+ok( $cb_request->request(\%params), "Execute abort callback" );
 is( $params{result}, 'aborted', "Check abort result" );
 
 ##############################################################################
 # Test the aborted method.
 %params = ( "$key|test_aborted_cb" => 1 );
-ok( $cb_exec->execute(\%params), "Execute aborted callback" );
+ok( $cb_request->request(\%params), "Execute aborted callback" );
 is( $params{result}, 'yes', "Check aborted result" );
 
 ##############################################################################
@@ -246,7 +246,7 @@ my $string = 'yowza';
 %params = ( "$key|submit_cb" => 1,
             submit           => $string,
             do_flip         => 1 );
-ok( $cb_exec->execute(\%params), "Execute pre callback" );
+ok( $cb_request->request(\%params), "Execute pre callback" );
 is( $params{result}, reverse($string), "Check pre result" );
 
 
@@ -254,31 +254,31 @@ is( $params{result}, reverse($string), "Check pre result" );
 # Test the post-execution callbacks.
 %params = ( "$key|simple_cb" => 1,
             do_upper => 1 );
-ok( $cb_exec->execute(\%params), "Execute post callback" );
+ok( $cb_request->request(\%params), "Execute post callback" );
 is( $params{result}, 'SUCCESS', "Check post result" );
 
 ##############################################################################
 # Now make sure that a callback with a value executes.
-ok( my $new_cb_exec = Params::CallbackExec->new( callbacks    => $cbs,
+ok( my $new_cb_request = Params::CallbackRequest->new( callbacks    => $cbs,
                                                  ignore_nulls => 1),
     "Create new CBExec that ignores nulls" );
 %params = ( "$key|simple_cb" => 1);
-ok( $new_cb_exec->execute(\%params), "Execute simple callback" );
+ok( $new_cb_request->request(\%params), "Execute simple callback" );
 is( $params{result}, 'Success', "Check simple result" );
 
 # And try it with a null value.
 %params = ( "$key|simple_cb" => '');
-ok( $new_cb_exec->execute(\%params), "Execute null simple callback" );
+ok( $new_cb_request->request(\%params), "Execute null simple callback" );
 is( $params{result}, undef, "Check null simple result" );
 
 # And with undef.
 %params = ( "$key|simple_cb" => undef);
-ok( $new_cb_exec->execute(\%params), "Execute undef simple callback" );
+ok( $new_cb_request->request(\%params), "Execute undef simple callback" );
 is( $params{result}, undef, "Check undef simple result" );
 
 # But 0 should succeed.
 %params = ( "$key|simple_cb" => 0);
-ok( $new_cb_exec->execute(\%params), "Execute 0 simple callback" );
+ok( $new_cb_request->request(\%params), "Execute 0 simple callback" );
 is( $params{result}, 'Success', "Check 0 simple result" );
 
 
