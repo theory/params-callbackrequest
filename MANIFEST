@@ -3,8 +3,8 @@ MANIFEST			This list of files
 Makefile.PL
 README
 lib/Params/Callback.pm
-lib/Params/CallbackRequest/Exceptions.pm
 lib/Params/CallbackRequest.pm
+lib/Params/CallbackRequest/Exceptions.pm
 t/01basic.t
 t/02priority.t
 t/03keys.t
@@ -12,4 +12,5 @@ t/04errors.t
 t/05object.t
 t/06object_request.t
 t/07combined.t
+t/08apache.t
 t/09pod.t

@@ -887,15 +887,21 @@ important, first.
 
   $cb_request->request(\%params);
 
+  # If you're in a mod_perl environment, pass in an Apache request object
+  # to be passed to the Callback classes.
+  $cb_request->request(\%params, apache_req => $r);
+
   # Or pass in argument to be passed to callback class constructors.
   $cb_request->request(\%params, @args);
 
 Executes the callbacks specified when the Params::CallbackRequest object was
-created. It takes a single required argument, a hash reference of parameters.
-Any subsequent arguments are passed to the constructor for each callback class
-for which callbacks will be executed. Returns the Params::CallbackRequest
-object on success, or the code passed to Params::Callback's C<abort()> method
-if callback execution was aborted.
+created. It takes a single required argument, a hash reference of
+parameters. Any subsequent arguments are passed to the constructor for each
+callback class for which callbacks will be executed. By default, the only
+extra parameter supported by the Params::Callback base class is an Apache
+request object, which can be passed via the C<apache_req> parameter. Returns
+the Params::CallbackRequest object on success, or the code passed to
+Params::Callback's C<abort()> method if callback execution was aborted.
 
 A single call to C<request()> is referred to as a "callback request"
 (naturally!). First, all pre-request callbacks are executed. Then, any
@@ -929,7 +935,8 @@ read-only accessor methods of the same name. For example:
 
 Garth Webb implemented the original callbacks in Bricolage, based on an idea
 he borrowed from Paul Lindner's work with Apache::ASP. My thanks to them both
-for planting this great idea!
+for planting this great idea! This implementation is however completely
+independent of previous implementations.
 
 =head1 BUGS
 

@@ -455,18 +455,14 @@ callback.
 Returns a reference to the request parameters hash. Any changes you make to
 this hash will propagate beyond the lifetime of the request.
 
-=begin comment
-
 =head3 apache_req
 
   my $r = $cb->apache_req;
 
-Returns the Apache request object for the current request. If you've told
-Mason to use L<Apache::Request|Apache::Request>, an Apache::Request object
-that will be returned. Otherwise, if you're having CGI process your request
-arguments, then it will be the plain old L<Apache|Apache> object.
-
-=end comment
+Returns the Apache request object for the current request, provided you've
+passed one to C<< Params::CallbackRequest->request >>. This will be most
+useful in a mod_perl environment, of course. Use Apache:FakeRequest in
+tests to emmulate the behavior of an Apache request object.
 
 =head3 priority
 
@@ -556,27 +552,21 @@ for you. The exception to this rule is values submitted under keys named for
 HTML "image" input fields. See the note about this under the documentation for
 the C<trigger_key()> method.
 
-=begin comment
-
 =head3 redirected
 
   $cb->redirect($url) unless $cb->redirected;
 
 If the request has been redirected, this method returns the redirection
-URL. Otherwise, it returns false. This method is useful for conditions in which
-one callback has called C<< $cb->redirect >> with the optional C<$wait>
+URL. Otherwise, it returns false. This method is useful for conditions in
+which one callback has called C<< $cb->redirect >> with the optional C<$wait>
 argument set to a true value, thus allowing subsequent callbacks to continue
 to execute. If any of those subsequent callbacks want to call
 C<< $cb->redirect >> themselves, they can check the value of
 C<< $cb->redirected >> to make sure it hasn't been done already.
 
-=end comment
-
 =head2 Other Methods
 
 Params::Callback offers has a few other publicly accessible methods.
-
-=begin comment
 
 =head3 redirect
 
@@ -584,17 +574,22 @@ Params::Callback offers has a few other publicly accessible methods.
   $cb->redirect($url, $status);
   $cb->redirect($url, $status, $wait);
 
+This method can be used to redirect a request in a mod_perl environment,
+provided that an Apache request object has been passed to
+C<< Params::CallbackRequest->new >>.
+Outide of a mod_perl environment or without an Apache request object,
+C<redirect()> will still set the proper value for the the C<redirected()>
+method to return, and will still abort the callback request.
+
 Given a URL, this method generates a proper HTTP redirect for that URL. By
 default, the status code used is "302", but this can be overridden via the
 C<$status> argument. If the optional C<$wait> argument is true, any callbacks
 scheduled to be executed after the call to C<redirect> will continue to be
 executed. In that case, C<< $cb->abort >> will not be called; rather,
-Params::CallbackRequest will finish executing all remaining
-callbacks and then check the status and abort before Mason creates and
-executes a component stack. If the C<$wait> argument is unspecified or false,
+Params::CallbackRequest will finish executing all remaining callbacks and then
+return the abort status. If the C<$wait> argument is unspecified or false,
 then the request will be immediately terminated without executing subsequent
-callbacks or, of course, any Mason components. This approach relies on the
-execution of C<< $cb->abort >>.
+callbacks or. This approach relies on the execution of C<< $cb->abort >>.
 
 Since C<< $cb->redirect >> calls C<< $cb->abort >>, it will be trapped by an
 C<eval {}> block. If you are using an C<eval {}> block in your code to trap
@@ -607,8 +602,6 @@ exceptions, you need to make sure to rethrow these exceptions, like this:
   die $@ if $cb->aborted;
 
   # handle other exceptions
-
-=end comment
 
 =head3 abort
 
