@@ -1,9 +1,9 @@
 #!perl -w
 
-# $Id: 01basic.t,v 1.3 2003/08/15 22:59:00 david Exp $
+# $Id: 01basic.t,v 1.4 2003/08/16 01:17:38 david Exp $
 
 use strict;
-use Test::More tests => 50;
+use Test::More tests => 55;
 
 BEGIN { use_ok('Params::CallbackExec') }
 
@@ -17,6 +17,7 @@ my $cbs = [];
 sub simple {
     my $cb = shift;
     isa_ok( $cb, 'Params::Callback' );
+    isa_ok( $cb->cb_exec, 'Params::CallbackExec' );
     my $params = $cb->params;
     $params->{result} = 'Success';
 }
