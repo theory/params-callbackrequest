@@ -35,6 +35,7 @@ BEGIN {
     for my $attr (qw( cb_request
                       params
                       apache_req
+                      cgi_object
                       priority
                       cb_key
                       pkg_key
