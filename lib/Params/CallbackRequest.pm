@@ -348,11 +348,11 @@ Functional parameter-triggered callbacks:
   }
 
   # Set up a callback request object.
-  my $cb_request = Params::CallbackRequest
-    ( callbacks => [ { cb_key  => 'calc_time',
+  my $cb_request = Params::CallbackRequest->new(
+      callbacks => [ { cb_key  => 'calc_time',
                        pkg_key => 'myCallbacker',
                        cb      => \&calc_time } ]
-    );
+  );
 
   # Request callback execution.
   my %params = ('myCallbacker|calc_time_cb' => 1);
