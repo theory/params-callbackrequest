@@ -5,6 +5,7 @@ Revision history for Perl extension Params::CallbackRequest.
         and Attribute::Handlers that would prevent the failure of either of
         those modules to load to propagate.
       - Fixed typo in the Synopsis spotted by Scott Lanning.
+      - Added support for mod_perl2, as well as mod_perl 1 and mod_perl 1.99.
 
 1.13  2004-04-20T18:29:37
       - Apache 2 compatability added thanks to Fred Moyer.

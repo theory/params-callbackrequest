@@ -19,8 +19,10 @@ my $is_num = { 'valid priority' => sub { $_[0] =~ /^\d$/ } };
 
 # Use Apache::RequestRec for mod_perl 2
 my $ap_req_class = defined $mod_perl::VERSION && $mod_perl::VERSION >= 1.99
-  ? 'Apache::RequestRec'
-  : 'Apache';
+    ? 'Apache::RequestRec'
+    : defined $mod_perl2::VERSION
+        ? 'Apache2::RequestRec'
+        : 'Apache';
 
 BEGIN {
     # The object-oriented interface is only supported with the use of
