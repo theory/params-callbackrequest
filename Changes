@@ -1,6 +1,6 @@
 Revision history for Perl extension Params::CallbackRequest.
 
-1.15
+1.15  2006-05-26T21:28:55
       - Added the 'requester' attribute to Params::Callback. This can be
         specified by passing the 'requester' paremter to request(), and can be
         anything.
