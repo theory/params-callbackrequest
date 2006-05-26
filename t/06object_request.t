@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 06object_request.t,v 1.3 2003/10/08 19:27:06 david Exp $
+# $Id$
 
 use strict;
 use Test::More;
@@ -17,7 +17,7 @@ BEGIN {
       unless eval { require Attribute::Handlers }
       and eval { require Class::ISA };
 
-    plan tests => 44;
+    plan tests => 48;
 
     $base_key = 'OOTester';
 }
@@ -60,6 +60,13 @@ sub pre_post : Callback {
     main::is($self->priority, 3, "Check default priority constant" );
     my $params = $self->params;
     $params->{chk_post} = 1;
+}
+
+sub requestit : Callback {
+    my $self      = shift;
+    my $value    = $self->value;
+    my $requester = $self->requester;
+    main::is ref $requester || $requester, $value, "Request is '$value'";
 }
 
 sub chk_post : PostCallback {
@@ -197,6 +204,15 @@ is( $params{result}, 'TAKE ME UP AGAIN! Overridden PreCallback PostCallback',
 %params = ("$base_key|pre_post_cb" => 1);
 ok( $cb_request->request(\%params), "Execute attribute check callback" );
 is( $params{result}, 'Attributes okay', "Check attribute check result" );
+
+##############################################################################
+# Check that requester is properly passed.
+%params = ("$base_key|requestit_cb" => 'foo');
+ok( $cb_request->request(\%params, requester => 'foo'),
+    "Execute request callback" );
+%params = ("$base_key|requestit_cb" => ref $cb_request );
+ok( $cb_request->request(\%params, requester => $cb_request ),
+    "Execute request as object callback" );
 
 1;
 

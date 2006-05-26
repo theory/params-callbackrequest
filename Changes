@@ -1,6 +1,9 @@
 Revision history for Perl extension Params::CallbackRequest.
 
 1.15
+      - Added the 'requester' attribute to Params::Callback. This can be
+        specified by passing the 'requester' paremter to request(), and can be
+        anything.
 
 1.14  2006-03-02T20:07:28
       - Removed an unnecessary eval block around the loading of Class::ISA

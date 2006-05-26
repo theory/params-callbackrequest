@@ -42,6 +42,7 @@ BEGIN {
                       priority
                       cb_key
                       pkg_key
+                      requester
                       trigger_key
                       value )) {
         no strict 'refs';
@@ -50,50 +51,53 @@ BEGIN {
     *class_key = \&pkg_key;
 }
 
-my %valid_params =
-  ( cb_request      =>
-    { isa        => 'Params::CallbackRequest',
+my %valid_params = (
+    cb_request => { isa => 'Params::CallbackRequest' },
+
+    params => {
+        type => Params::Validate::HASHREF,
     },
 
-    params =>
-    {  type      => Params::Validate::HASHREF,
+    apache_req => {
+        isa      => $ap_req_class,
+        optional => 1,
     },
 
-    apache_req   =>
-    { isa        => $ap_req_class,
-      optional   => 1,
+    priority => {
+        type      => Params::Validate::SCALAR,
+        callbacks => $is_num,
+        optional  => 1,
+        desc      => 'Priority'
     },
 
-    priority =>
-    { type      => Params::Validate::SCALAR,
-      callbacks => $is_num,
-      optional  => 1,
-      desc      => 'Priority'
+    cb_key => {
+        type     => Params::Validate::SCALAR,
+        optional => 1,
+        desc     => 'Callback key'
     },
 
-    cb_key =>
-    { type      => Params::Validate::SCALAR,
-      optional  => 1,
-      desc      => 'Callback key'
+    pkg_key => {
+        type     => Params::Validate::SCALAR,
+        optional => 1,
+        desc     => 'Package key'
     },
 
-    pkg_key =>
-    { type      => Params::Validate::SCALAR,
-      optional  => 1,
-      desc      => 'Package key'
+    trigger_key => {
+        type     => Params::Validate::SCALAR,
+        optional => 1,
+        desc     => 'Trigger key'
     },
 
-    trigger_key =>
-    { type      => Params::Validate::SCALAR,
-      optional  => 1,
-      desc      => 'Trigger key'
+    value => {
+        optional => 1,
+        desc     => 'Callback value'
     },
 
-    value =>
-    { optional  => 1,
-      desc      => 'Callback value'
-    },
-  );
+    requester => {
+        optional => 1,
+        desc     => 'Requesting object'
+    }
+);
 
 sub new {
     my $proto = shift;
@@ -480,6 +484,15 @@ Returns the Apache request object for the current request, provided you've
 passed one to C<< Params::CallbackRequest->request >>. This will be most
 useful in a mod_perl environment, of course. Use Apache:FakeRequest in
 tests to emmulate the behavior of an Apache request object.
+
+=head3 requester
+
+  my $r = $cb->requester;
+
+Returns the object that executed the callback by calling C<request()> on a
+Params::CallbackRequest object. Only available if the C<requester> parameter
+is passed to C<< Params::CallbackRequest->request >>. This can be useful for
+callbacks to get access to the object that executed the callbacks.
 
 =head3 priority
 

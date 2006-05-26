@@ -1,6 +1,6 @@
 ---
 name: Params-CallbackRequest
-version: 1.14
+version: 1.15
 author:
   - 'David Wheeler <david@kineticode.com>'
 abstract: Functional and object-oriented callback architecture
@@ -20,14 +20,14 @@ recommends:
 provides:
   Params::Callback:
     file: lib/Params/Callback.pm
-    version: 1.14
+    version: 1.15
   Params::CallbackRequest:
     file: lib/Params/CallbackRequest.pm
-    version: 1.14
+    version: 1.15
   Params::CallbackRequest::Exceptions:
     file: lib/Params/CallbackRequest/Exceptions.pm
-    version: 1.14
-generated_by: Module::Build version 0.2707
+    version: 1.15
+generated_by: Module::Build version 0.2801
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html
   version: 1.2
