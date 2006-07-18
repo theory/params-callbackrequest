@@ -17,12 +17,12 @@ Params::Validate::validation_options
 
 my $is_num = { 'valid priority' => sub { $_[0] =~ /^\d$/ } };
 
-# Use Apache::RequestRec for mod_perl 2
-my $ap_req_class = defined $mod_perl::VERSION && $mod_perl::VERSION >= 1.99
-    ? 'Apache::RequestRec'
-    : defined $mod_perl2::VERSION
+# Use Apache2?::RequestRec for mod_perl 2
+use constant APREQ_CLASS => exists $ENV{MOD_PERL_API_VERSION}
+    ? $ENV{MOD_PERL_API_VERSION} >= 2
         ? 'Apache2::RequestRec'
-        : 'Apache';
+        : 'Apache::RequestRec'
+    : 'Apache';
 
 BEGIN {
     # The object-oriented interface is only supported with the use of
@@ -59,7 +59,7 @@ my %valid_params = (
     },
 
     apache_req => {
-        isa      => $ap_req_class,
+        isa      => APREQ_CLASS,
         optional => 1,
     },
 
@@ -354,7 +354,7 @@ sub redirect {
     if (my $r = $self->apache_req) {
         $r->method('GET');
         $r->headers_in->unset('Content-length');
-        $r->err_header_out( Location => $url );
+        $r->err_headers_out->add( Location => $url );
     }
     $self->abort($status) unless $wait;
 }

@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: 08apache.t,v 1.2 2003/08/19 17:39:08 david Exp $
+# $Id$
 
 use strict;
 use Test::More;
@@ -10,7 +10,7 @@ my $cbs = [];
 BEGIN {
     plan skip_all => 'Testing of apache_req requires Apache::FakeRequest'
       unless eval { require Apache::FakeRequest };
-    plan tests => 14;
+    plan tests => 15;
     use_ok('Params::CallbackRequest');
 }
 
@@ -21,6 +21,10 @@ BEGIN {
 package Params::Callback::Test::Headers;
 sub unset {}
 sub new { bless {} }
+sub add {
+    my ($self, $key, $val) = @_;
+    $self->{$key} = $val;
+}
 
 package main;
 
@@ -51,15 +55,20 @@ push @$cbs, { pkg_key => $key,
 
 ##############################################################################
 # Create the callback request object.
-ok( my $cb_request = Params::CallbackRequest->new( callbacks => $cbs),
+ok( my $cb_request = Params::CallbackRequest->new( callbacks => $cbs ),
     "Construct CBExec object" );
 isa_ok($cb_request, 'Params::CallbackRequest' );
 
 # Create an Apache request object.
-ok( my $headers = Params::Callback::Test::Headers->new,
-     "Create headers object" );
+ok( my $headers_in = Params::Callback::Test::Headers->new,
+     "Create headers_in object" );
+ok( my $err_headers_out = Params::Callback::Test::Headers->new,
+     "Create err_headers_out object" );
 
-ok( my $apache_req = Apache::FakeRequest->new( headers_in => $headers ),
+ok( my $apache_req = Apache::FakeRequest->new(
+    headers_in      => $headers_in,
+    err_headers_out => $err_headers_out,
+),
     "Create apache request object" );
 
 # Execute the delayed redirection callback.
@@ -68,9 +77,10 @@ my %params = ( "$key|redir_cb"    => 1,
 is( $cb_request->request(\%params, apache_req => $apache_req), 302,
     "Execute delayed redir callback" );
 
-# Check apache request values (too bad Apache::FakeRequest can't handle
-# parameter lists. This should be good enough, though.
-is( delete $apache_req->{err_header_out}, 'Location', "Check err_header_out" );
+# Check apache request values.
+is_deeply $apache_req->{err_headers_out}, { Location => $url },
+    "Check err_header_out";
+delete $apache_req->{err_headers_out}{Location};
 is( delete $apache_req->{method}, 'GET', "Check request method" );
 
 ##############################################################################
@@ -80,7 +90,9 @@ is( $cb_request->request(\%params, apache_req => $apache_req), 302,
     "Execute instant redir callback" );
 
 # Check the Apache settings again.
-is( delete $apache_req->{err_header_out}, 'Location', "Check err_header_out" );
+is_deeply $apache_req->{err_headers_out}, { Location => $url },
+    "Check err_header_out";
+delete $apache_req->{err_headers_out}{Location};
 is( delete $apache_req->{method}, 'GET', "Check request method" );
 
 ##############################################################################
