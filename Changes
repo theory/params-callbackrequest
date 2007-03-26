@@ -1,6 +1,6 @@
 Revision history for Perl extension Params::CallbackRequest.
 
-1.16
+1.16  2007-03-26T21:25:17
       - Fixed a bug detecting mod_perl2. Reported by Jimmy Li.
       - Fixed a bug in the redirect() method under mod_perl2. Report and fix
         from Jimmy Li.
