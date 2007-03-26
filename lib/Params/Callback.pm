@@ -5,7 +5,7 @@ use Params::Validate ();
 use Params::CallbackRequest::Exceptions (abbr => [qw(throw_bad_params)]);
 
 use vars qw($VERSION);
-$VERSION = '1.16';
+$VERSION = '1.17';
 use constant DEFAULT_PRIORITY => 5;
 use constant REDIRECT => 302;
 
@@ -1045,7 +1045,7 @@ David Wheeler <david@kineticode.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2003-2004 David Wheeler
+Copyright 2003-2007 David Wheeler
 
 This library is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
