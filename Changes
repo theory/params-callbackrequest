@@ -1,5 +1,7 @@
 Revision history for Perl extension Params::CallbackRequest.
 
+1.18
+
 1.17  2007-03-27T16:21:34
       - Updated copyright date.
       - Now requiring (rather than recommending) Class::ISA and

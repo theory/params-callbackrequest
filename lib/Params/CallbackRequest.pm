@@ -7,7 +7,7 @@ use Params::CallbackRequest::Exceptions (abbr => [qw(throw_bad_params
                                                      throw_cb_exec)]);
 
 use vars qw($VERSION);
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 BEGIN {
     for my $attr (qw( default_priority

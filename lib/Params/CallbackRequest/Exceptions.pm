@@ -2,7 +2,7 @@ package Params::CallbackRequest::Exceptions;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '1.17';
+$VERSION = '1.18';
 
 use Exception::Class ( 'Params::Callback::Exception' =>
 		       { description => 'Params::Callback exception',
