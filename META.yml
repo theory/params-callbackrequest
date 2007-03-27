@@ -1,6 +1,6 @@
 ---
 name: Params-CallbackRequest
-version: 1.16
+version: 1.17
 author:
   - 'David Wheeler <david@kineticode.com>'
 abstract: Functional and object-oriented callback architecture
@@ -8,25 +8,24 @@ license: perl
 resources:
   license: http://dev.perl.org/licenses/
 requires:
+  Attribute::Handlers: 0.77
+  Class::ISA: 0
   Exception::Class: 1.10
   Params::Validate: 0.59
   Test::Simple: 0.17
+  perl: 5.6.0
 build_requires:
   Test::Simple: 0.17
-recommends:
-  Attribute::Handlers: 0.77
-  Class::ISA: 0
-  perl: 5.6.0
 provides:
   Params::Callback:
     file: lib/Params/Callback.pm
-    version: 1.16
+    version: 1.17
   Params::CallbackRequest:
     file: lib/Params/CallbackRequest.pm
-    version: 1.16
+    version: 1.17
   Params::CallbackRequest::Exceptions:
     file: lib/Params/CallbackRequest/Exceptions.pm
-    version: 1.16
+    version: 1.17
 generated_by: Module::Build version 0.2807
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html

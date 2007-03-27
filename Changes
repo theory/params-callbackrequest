@@ -1,6 +1,10 @@
 Revision history for Perl extension Params::CallbackRequest.
 
 1.17
+      - Now requiring (rather than recommending) Class::ISA and
+        Attribute::Handlers, since the module requires Perl 5.6 or later
+        anyway, and virtually no one will want to use the module without these
+        modules. Test failure report from David Cantrell.
 
 1.16  2007-03-26T21:25:17
       - Fixed a bug detecting mod_perl2. Reported by Jimmy Li.
