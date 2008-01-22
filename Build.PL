@@ -3,6 +3,10 @@ use Module::Build;
 my $build = Module::Build->new(
     module_name    => 'Params::CallbackRequest',
     license        => 'perl',
+    create_makefile_pl => 'passthrough',
+    configure_requires => { 'Module::Build' => '0.2701' },
+    build_requires     => { 'Test::More'    => '0.17'   },
+    recommends         => { 'Test::Pod'           => '1.20' },
     requires       => {
         Params::Validate    => '0.59',
         Exception::Class    => '1.10',
@@ -11,9 +15,5 @@ my $build = Module::Build->new(
         Class::ISA          => 0,
         perl                => '5.6.0',
     },
-    build_requires => {
-        Test::Simple        => '0.17',
-    },
-    create_makefile_pl => 'passthrough',
 );
 $build->create_build_script;
