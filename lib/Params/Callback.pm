@@ -36,15 +36,17 @@ BEGIN {
     }
 
     # Build read-only accessors.
-    for my $attr (qw( cb_request
-                      params
-                      apache_req
-                      priority
-                      cb_key
-                      pkg_key
-                      requester
-                      trigger_key
-                      value )) {
+    for my $attr (qw(
+        cb_request
+        params
+        apache_req
+        priority
+        cb_key
+        pkg_key
+        requester
+        trigger_key
+        value
+    )) {
         no strict 'refs';
         *{$attr} = sub { $_[0]->{$attr} };
     }
@@ -116,16 +118,17 @@ sub register_subclass {
     my $class = caller;
     return unless UNIVERSAL::isa($class, __PACKAGE__)
       and $class ne __PACKAGE__;
-    my $spec = { default_priority =>
-                 { type      => Params::Validate::SCALAR,
-                   optional  => 1,
-                   callbacks => $is_num
-                 },
-                 class_key =>
-                 { type      => Params::Validate::SCALAR,
-                   optional  => 1
-                 },
-               };
+    my $spec = {
+        default_priority => {
+            type      => Params::Validate::SCALAR,
+            optional  => 1,
+            callbacks => $is_num
+        },
+        class_key => {
+            type      => Params::Validate::SCALAR,
+            optional  => 1
+        },
+    };
 
     my %p = Params::Validate::validate(@_, $spec);
 
@@ -160,12 +163,13 @@ sub Callback : ATTR(CODE, BEGIN) {
     # Validate the arguments. At this point, there's only one allowed,
     # priority. This is to set a priority for the callback method that
     # overrides that set for the class.
-    my $spec = { priority =>
-                 { type      => Params::Validate::SCALAR,
-                   optional  => 1,
-                   callbacks => $is_num
-                 },
-               };
+    my $spec = {
+        priority => {
+            type      => Params::Validate::SCALAR,
+            optional  => 1,
+            callbacks => $is_num
+        },
+    };
     my %p = Params::Validate::validate(@$data, $spec);
     # Get the priority.
     my $priority = exists $p{priority} ? $p{priority} :
@@ -320,9 +324,9 @@ sub _load_classes {
     # Process the class keys in the order they're given, or just do all of
     # them if $ckeys eq 'ALL' or $ckeys->[0]  eq '_ALL_' (checked by
     # Params::CallbackRequest).
-    foreach my $ckey (ref $ckeys && $ckeys->[0] ne '_ALL_'
-                      ? @$ckeys
-                      : keys %classes) {
+    foreach my $ckey (
+        ref $ckeys && $ckeys->[0] ne '_ALL_' ? @$ckeys : keys %classes
+    ) {
         my $class = $classes{$ckey} or
           die "Class with class key '$ckey' not loaded. Did you forget use"
             . " it or to call register_subclass()?";

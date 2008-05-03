@@ -2,6 +2,8 @@ Revision history for Perl extension Params::CallbackRequest.
 
 1.18
       - Updated POD test to take advantage of Test::Pod 1.20 or later.
+      - Reformatted the code a bit.
+      - Added a link to the Subversion repository.
 
 1.17  2007-03-27T16:21:34
       - Updated copyright date.

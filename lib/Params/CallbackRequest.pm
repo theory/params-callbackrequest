@@ -44,54 +44,56 @@ my $exception_handler = sub {
 };
 
 # Set up the valid parameters to new().
-my %valid_params =
-  ( default_priority =>
-    { type      => Params::Validate::SCALAR,
-      callbacks => { 'valid priority' => sub { $_[0] =~ /^\d$/ } },
-      default   => 5,
+my %valid_params = (
+    default_priority => {
+        type      => Params::Validate::SCALAR,
+        callbacks => {
+            'valid priority' => sub { $_[0] =~ /^\d$/ }
+        },
+        default => 5,
     },
 
-    default_pkg_key =>
-    { type      => Params::Validate::SCALAR,
-      default   => 'DEFAULT',
+    default_pkg_key => {
+        type    => Params::Validate::SCALAR,
+        default => 'DEFAULT',
     },
 
-    callbacks =>
-    { type      => Params::Validate::ARRAYREF,
-      optional  => 1,
+    callbacks => {
+        type     => Params::Validate::ARRAYREF,
+        optional => 1,
     },
 
-    pre_callbacks =>
-    { type      => Params::Validate::ARRAYREF,
-      optional  => 1,
+    pre_callbacks => {
+        type     => Params::Validate::ARRAYREF,
+        optional => 1,
     },
 
-    post_callbacks =>
-    { type      => Params::Validate::ARRAYREF,
-      optional  => 1,
+    post_callbacks => {
+        type     => Params::Validate::ARRAYREF,
+        optional => 1,
     },
 
-    cb_classes =>
-    { type      => Params::Validate::ARRAYREF | Params::Validate::SCALAR,
-      callbacks => { 'valid cb_classes' => $valid_cb_classes },
-      optional  => 1,
+    cb_classes => {
+        type      => Params::Validate::ARRAYREF | Params::Validate::SCALAR,
+        callbacks => { 'valid cb_classes' => $valid_cb_classes },
+        optional  => 1,
     },
 
-    ignore_nulls =>
-    { type      => Params::Validate::BOOLEAN,
-      default   => 0,
+    ignore_nulls => {
+        type    => Params::Validate::BOOLEAN,
+        default => 0,
     },
 
-    exception_handler =>
-    { type      => Params::Validate::CODEREF,
-      default   => $exception_handler
+    exception_handler => {
+        type    => Params::Validate::CODEREF,
+        default => $exception_handler
     },
 
-    leave_notes =>
-    { type      => Params::Validate::BOOLEAN,
-      default   => 0,
+    leave_notes => {
+        type    => Params::Validate::BOOLEAN,
+        default => 0,
     },
-  );
+);
 
 BEGIN {
     # Load up any callback class definitions.
@@ -1008,9 +1010,14 @@ he borrowed from Paul Lindner's work with Apache::ASP. My thanks to them both
 for planting this great idea! This implementation is however completely
 independent of previous implementations.
 
-=head1 BUGS
+=head1 SUPPORT
 
-Please send bug reports to <bug-params-callbackrequest@rt.cpan.org>.
+This module is stored in an open repository at the following address:
+
+L<https://svn.kineticode.com/Params-CallbackRequest/trunk/>
+
+Patches against SVN::Notify are welcome. Please send bug reports to
+<bug-params-callbackrequest@rt.cpan.org>.
 
 =head1 SEE ALSO
 
