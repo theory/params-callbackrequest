@@ -222,6 +222,15 @@ L<Params::CallbackRequest|Params::CallbackRequest> sets up callbacks for executi
 L<Exception::Class|Exception::Class> defines the interface for the exception
 classes created here.
 
+=head1 SUPPORT
+
+This module is stored in an open repository at the following address:
+
+L<https://svn.kineticode.com/Params-CallbackRequest/trunk/>
+
+Patches against Params::CallbackRequest are welcome. Please send bug reports
+to <bug-params-callbackrequest@rt.cpan.org>.
+
 =head1 AUTHOR
 
 David Wheeler <david@kineticode.com>

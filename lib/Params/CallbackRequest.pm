@@ -1010,15 +1010,6 @@ he borrowed from Paul Lindner's work with Apache::ASP. My thanks to them both
 for planting this great idea! This implementation is however completely
 independent of previous implementations.
 
-=head1 SUPPORT
-
-This module is stored in an open repository at the following address:
-
-L<https://svn.kineticode.com/Params-CallbackRequest/trunk/>
-
-Patches against SVN::Notify are welcome. Please send bug reports to
-<bug-params-callbackrequest@rt.cpan.org>.
-
 =head1 SEE ALSO
 
 L<Params::Callback|Params::Callback> objects get passed as the sole argument
@@ -1029,6 +1020,15 @@ create callback classes and methods.
 
 L<MasonX::Interp::WithCallbacks|MasonX::Intper::WithCallbacks> uses this
 module to provide a callback architecture for HTML::Mason.
+
+=head1 SUPPORT
+
+This module is stored in an open repository at the following address:
+
+L<https://svn.kineticode.com/Params-CallbackRequest/trunk/>
+
+Patches against Params::CallbackRequest are welcome. Please send bug reports
+to <bug-params-callbackrequest@rt.cpan.org>.
 
 =head1 AUTHOR
 

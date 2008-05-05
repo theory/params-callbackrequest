@@ -1043,6 +1043,15 @@ L<Params::CallbackRequest|Params::CallbackRequest> constructs Params::Callback
 objects and executes the appropriate callback functions and/or methods. It's
 worth a read.
 
+=head1 SUPPORT
+
+This module is stored in an open repository at the following address:
+
+L<https://svn.kineticode.com/Params-CallbackRequest/trunk/>
+
+Patches against Params::CallbackRequest are welcome. Please send bug reports
+to <bug-params-callbackrequest@rt.cpan.org>.
+
 =head1 AUTHOR
 
 David Wheeler <david@kineticode.com>
