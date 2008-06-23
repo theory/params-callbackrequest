@@ -1,8 +1,10 @@
 Revision history for Perl extension Params::CallbackRequest.
 
-1.19
+1.19  2008-06-23T18:00:43
       - Fixed a pasto in the "Support" section of the documentaion, and added
         that section to all of the modules in this distribution.
+      - Fixed Perl 5.6 requirement to be properly detected by earlier Perls.
+        Thanks to Slaven Rezic for testing on Perl 5.5.
 
 1.18  2008-05-03T23:44:20
       - Updated POD test to take advantage of Test::Pod 1.20 or later.
