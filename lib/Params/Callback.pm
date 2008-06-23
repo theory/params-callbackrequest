@@ -1,6 +1,7 @@
 package Params::Callback;
 
 use strict;
+require 5.006;
 use Params::Validate ();
 use Params::CallbackRequest::Exceptions (abbr => [qw(throw_bad_params)]);
 

@@ -16,7 +16,7 @@ my $build = Module::Build->new(
         Test::Simple        => '0.17',
         Attribute::Handlers => '0.77',
         Class::ISA          => 0,
-        perl                => '5.6.0',
+        perl                => 5.006,
     },
 );
 $build->create_build_script;
