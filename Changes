@@ -1,6 +1,9 @@
 Revision history for Perl extension Params::CallbackRequest.
 
 1.20
+      - Moved repostitory to
+        [GitHub](https://github.com/theory/params-callbackrequest/).
+      - Switched to a "traditional" `Makefile.PL`.
 
 1.19  2008-06-23T18:00:43
       - Fixed a pasto in the "Support" section of the documentaion, and added
