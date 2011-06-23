@@ -1,7 +1,5 @@
 #!perl -w
 
-# $Id: 01basic.t,v 1.11 2003/09/07 18:05:00 david Exp $
-
 use strict;
 use Test::More tests => 73;
 

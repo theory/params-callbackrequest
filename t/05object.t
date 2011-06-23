@@ -1,7 +1,5 @@
 #!perl -w
 
-# $Id: 05object.t,v 1.7 2003/08/20 05:03:37 david Exp $
-
 use strict;
 use Test::More;
 my $base_key = 'OOTester';

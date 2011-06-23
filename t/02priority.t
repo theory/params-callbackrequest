@@ -1,7 +1,5 @@
 #!perl -w
 
-# $Id: 02priority.t,v 1.4 2003/08/18 23:56:09 david Exp $
-
 use strict;
 use Test::More tests => 30;
 

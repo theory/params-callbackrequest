@@ -1,7 +1,5 @@
 #!perl -w
 
-# $Id: 04errors.t,v 1.5 2003/08/25 03:26:01 david Exp $
-
 use strict;
 use Test::More tests => 51;
 

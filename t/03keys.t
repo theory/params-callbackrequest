@@ -1,7 +1,5 @@
 #!perl -w
 
-# $Id: 03keys.t,v 1.3 2003/08/18 23:56:09 david Exp $
-
 use strict;
 use Test::More tests => 15;
 
