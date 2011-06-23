@@ -54,7 +54,7 @@ The test suite requires:
 Copyright and License
 ---------------------
 
-Copyright 2003-2008 David Wheeler. Some Rights Reserved.
+Copyright 2003-2011 David E. Wheeler. Some Rights Reserved.
 
 This library is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
