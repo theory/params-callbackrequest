@@ -224,12 +224,14 @@ classes created here.
 
 =head1 SUPPORT
 
-This module is stored in an open repository at the following address:
+This module is stored in an open L<GitHub
+repository|http://github.com/theory/params-callbackrequest/>. Feel free to
+fork and contribute!
 
-L<https://svn.kineticode.com/Params-CallbackRequest/trunk/>
-
-Patches against Params::CallbackRequest are welcome. Please send bug reports
-to <bug-params-callbackrequest@rt.cpan.org>.
+Please file bug reports via L<GitHub
+Issues|http://github.com/theory/params-callbackrequest/issues/> or by sending
+mail to
+L<bug-params-callbackrequest@rt.cpan.org|mailto:bug-params-callbackrequest@rt.cpan.org>.
 
 =head1 AUTHOR
 

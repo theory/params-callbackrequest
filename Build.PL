@@ -18,5 +18,12 @@ my $build = Module::Build->new(
         Class::ISA          => 0,
         perl                => 5.006,
     },
+    meta_merge => {
+        resources => {
+            homepage   => 'http://search.cpan.org/dist/Params-CallbackRequest/',
+            bugtracker => 'http://github.com/theory/params-callbackrequest/issues/',
+            repository => 'http://github.com/theory/params-callbackrequest/',
+        }
+    },
 );
 $build->create_build_script;
