@@ -5,4 +5,6 @@
 \.bak$
 ^MANIFEST\.SKIP$
 ^Params-CallbackRequest
-\.svn
+\.git
+^MYMETA\.yml$
+^MYMETA\.json$
